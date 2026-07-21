@@ -3,6 +3,7 @@ import { glob } from 'astro/loaders';
 
 // Convención: cada colección tiene subcarpetas es/ y en/ con el MISMO nombre
 // de archivo por entrada — el slug compartido hace funcionar el toggle de idioma.
+// Imágenes de blog: public/images/blog/<nombre>.png → /images/blog/<nombre>.png
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/blog' }),
