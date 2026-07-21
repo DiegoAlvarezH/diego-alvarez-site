@@ -1,0 +1,30 @@
+---
+title: 'RAG in 2026: vector stores vs graph retrieval'
+description: 'Hybrid approaches that actually work in production.'
+date: 'Feb 2026'
+tag: 'AI'
+readTime: '7 min'
+featured: false
+order: 4
+---
+
+Pure vector search was the 2023-2024 standard. In 2026, the RAG systems surviving in production are almost all hybrid. Here's what I learned building them.
+
+## Where pure vector fails
+
+Semantic similarity doesn't understand relationships. "Which procedures depend on certificate X?" returns chunks that *mention* certificates, not the actual dependency chain. Embeddings compress meaning, not structure.
+
+## Where pure graph fails
+
+Building the graph. Extracting entities and relations from messy documents with an LLM is expensive, slow, and prone to hallucinations that silently poison the graph. A wrong graph is worse than no graph: it answers falsehoods with confidence.
+
+## The hybrid that works
+
+1. **Vector retrieval** as the first pass — cheap with good recall.
+2. **BM25 in parallel** for exact terms (codes, proper nouns, acronyms) that embeddings mangle.
+3. **Reranker** (cross-encoder) over the union of both.
+4. **Graph only for the subset** of the domain where relationships are critical and structured at the source — don't extract everything, model what's already relational.
+
+## The metric nobody measures
+
+Retrieval recall evaluated separately from generation. If the right chunk never reaches the context, the world's best model hallucinates. Evaluate retrieval first, generation second — in that order.

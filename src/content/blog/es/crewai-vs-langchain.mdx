@@ -1,0 +1,37 @@
+---
+title: 'Por qué usé CrewAI en lugar de LangChain'
+description: 'Una comparación pragmática después de llevar ambos a producción.'
+date: 'Abr 2026'
+tag: 'AI AGENTS'
+readTime: '6 min'
+featured: false
+order: 2
+---
+
+Llevé ambos frameworks a producción en sistemas distintos. Esta no es una comparación de features — es lo que aprendí manteniéndolos.
+
+## El problema de LangChain no es técnico
+
+Es de abstracción. LangChain abstrae *todo*: prompts, memoria, herramientas, parsers. Cuando algo falla en producción, el stack trace atraviesa seis capas de abstracciones que no escribiste. Depurar un `AgentExecutor` a las 2 AM es una experiencia formativa que no le deseo a nadie.
+
+## CrewAI acierta en el modelo mental
+
+Roles, tareas y procesos. Un agente investigador, un agente escritor, un proceso secuencial. El código se lee como la descripción del problema:
+
+```python
+crew = Crew(
+    agents=[researcher, writer],
+    tasks=[research_task, writing_task],
+    process=Process.sequential,
+)
+```
+
+Cuando el QA lead pregunta "¿qué hace este sistema?", le muestro el código y lo entiende. Eso vale más que cualquier feature.
+
+## Donde CrewAI se queda corto
+
+Control fino del loop de ejecución. Si necesitas interceptar cada llamada al LLM, reintentar con lógica custom o hacer streaming granular, terminas peleando contra el framework. Para eso, llamadas directas a la API con un loop propio siguen siendo imbatibles.
+
+## Mi regla
+
+Workflows multi-agente con roles claros → CrewAI. Control total del loop → API directa. LangChain → solo si ya lo tienes y funciona.

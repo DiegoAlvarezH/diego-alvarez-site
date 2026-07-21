@@ -1,0 +1,177 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@/styles/global.css';
+import Nav from '@/components/Nav.astro';
+import Footer from '@/components/Footer.astro';
+import CursorGlow from '@/components/CursorGlow.astro';
+import ScrollProgress from '@/components/ScrollProgress.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const { title = t('meta.title'), description = t('meta.description') } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// hreflang alternates: misma ruta en cada idioma
+let basePath = Astro.url.pathname;
+if (lang !== 'es') basePath = basePath.replace(/^\/en/, '') || '/';
+const alternates = [
+  { hreflang: 'es', href: new URL(localePath('es', basePath), Astro.site) },
+  { hreflang: 'en', href: new URL(localePath('en', basePath), Astro.site) },
+  { hreflang: 'x-default', href: new URL(localePath('es', basePath), Astro.site) },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_CO' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;600;700;800;900&display=swap"
+    />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: 'Diego Alvarez',
+      jobTitle: 'Senior Software & AI Engineer',
+      url: 'https://diegoalvarez.tech',
+      address: { '@type': 'PostalAddress', addressLocality: 'Medellín', addressCountry: 'CO' },
+      sameAs: [
+        'https://github.com/DiegoAlvarezH',
+        'https://linkedin.com/in/diegoalvarezh',
+      ],
+    })} />
+
+    <script is:inline>
+      // Tema: aplicar antes del primer paint para evitar FOUC.
+      // ClientRouter reemplaza los atributos de <html> en cada swap → reaplicar.
+      (() => {
+        const getTheme = () => {
+          try {
+            return (
+              localStorage.getItem('theme') ??
+              (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+            );
+          } catch {
+            return 'dark';
+          }
+        };
+        const apply = () => document.documentElement.setAttribute('data-theme', getTheme());
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
+
+    <script is:inline>
+      // Preferencia de idioma: en la primera visita de la sesión a la home,
+      // redirige al idioma guardado antes del primer paint. Solo en '/' para
+      // no secuestrar deep links compartidos.
+      (() => {
+        try {
+          if (sessionStorage.getItem('lang-visited')) return;
+          sessionStorage.setItem('lang-visited', '1');
+          const pref = localStorage.getItem('lang');
+          const path = location.pathname.replace(/\/$/, '') || '/';
+          if (pref === 'en' && path === '/') location.replace('/en');
+          else if (pref === 'es' && path === '/en') location.replace('/');
+        } catch {
+          /* storage no disponible (modo privado estricto) */
+        }
+      })();
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body class="bg-bg text-white">
+    <CursorGlow />
+    <ScrollProgress />
+    <Nav />
+    <slot />
+    <Footer />
+
+    <script>
+      // Reveal on scroll + counters — reemplaza framer-motion (~0 KB vs 40 KB gzip)
+      function initMotion() {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const revealEls = document.querySelectorAll<HTMLElement>('.reveal:not(.is-visible)');
+        if (reduced) {
+          revealEls.forEach((el) => el.classList.add('is-visible'));
+        } else {
+          const io = new IntersectionObserver(
+            (entries) => {
+              for (const e of entries) {
+                if (e.isIntersecting) {
+                  e.target.classList.add('is-visible');
+                  io.unobserve(e.target);
+                }
+              }
+            },
+            { rootMargin: '-60px' }
+          );
+          revealEls.forEach((el) => io.observe(el));
+        }
+
+        const counters = document.querySelectorAll<HTMLElement>('[data-counter]:not([data-done])');
+        const runCounter = (el: HTMLElement) => {
+          el.dataset.done = '1';
+          const value = Number(el.dataset.counter || '0');
+          const suffix = el.dataset.suffix || '';
+          if (reduced) {
+            el.textContent = value + suffix;
+            return;
+          }
+          const duration = 1.5;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const progress = Math.min((now - start) / 1000 / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * value) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+            else el.textContent = value + suffix;
+          };
+          requestAnimationFrame(tick);
+        };
+        const cio = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              runCounter(e.target as HTMLElement);
+              cio.unobserve(e.target);
+            }
+          }
+        });
+        counters.forEach((el) => cio.observe(el));
+      }
+
+      initMotion();
+      document.addEventListener('astro:page-load', initMotion);
+    </script>
+  </body>
+</html>

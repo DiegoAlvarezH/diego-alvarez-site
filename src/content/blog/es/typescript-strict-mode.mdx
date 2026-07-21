@@ -1,0 +1,34 @@
+---
+title: 'TypeScript strict mode: la deuda técnica que se paga sola'
+description: 'Por qué los flags estrictos ahorran más tiempo del que cuestan.'
+date: 'Ene 2026'
+tag: 'TYPESCRIPT'
+readTime: '4 min'
+featured: false
+order: 5
+---
+
+Cada proyecto que hereda `"strict": false` tiene la misma historia: alguien lo apagó "para avanzar rápido" y tres años después nadie se atreve a encenderlo. Los números dicen otra cosa.
+
+## El costo real de `strict: false`
+
+Sin `strictNullChecks`, cada acceso a propiedad es una apuesta. El clásico `Cannot read properties of undefined` no es un bug de JavaScript — es un bug de configuración de TypeScript. El compilador *sabía* que ese valor podía ser `undefined` y le dijiste que no te avisara.
+
+## Migración incremental sin drama
+
+No enciendas todo el día uno. Orden que funciona:
+
+```jsonc
+// 1. Lo más barato, mayor retorno
+"noImplicitAny": true,
+// 2. El que mata bugs de producción
+"strictNullChecks": true,
+// 3. El resto
+"strict": true
+```
+
+Combínalo con `// @ts-expect-error` en los puntos rojos existentes y una regla de CI: cero errores nuevos. La deuda vieja se paga por archivo tocado, no en un big bang.
+
+## El retorno
+
+En un backend NestJS que migré, `strictNullChecks` reveló 47 accesos potencialmente nulos. Doce eran bugs reales reportados por usuarios en los seis meses anteriores. El compilador los tenía localizados gratis — solo había que dejarlo hablar.

@@ -1,0 +1,142 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Icon from '@/components/Icon.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<BaseLayout title={`${post.data.title} — Diego Alvarez`} description={post.data.description}>
+  <main class="bg-bg min-h-screen">
+    <article class="max-w-[720px] mx-auto px-6 pt-32 pb-24">
+      <a
+        href={localePath(lang, '/blog')}
+        class="group font-mono text-accent text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
+      >
+        <span class="transition-transform duration-150 group-hover:-translate-x-1">←</span>
+        {t('blog.backToBlog')}
+      </a>
+
+      <header class="reveal">
+        <div class="flex items-center gap-3 mb-4 flex-wrap">
+          <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]">
+            {post.data.tag}
+          </span>
+          <span class="font-mono text-text-3 flex items-center gap-1 text-[10px]">
+            <Icon name="clock" size={10} />
+            {post.data.readTime}
+          </span>
+          <span class="font-mono text-text-3 text-[10px]">{post.data.date}</span>
+        </div>
+        <h1 class="font-sans font-extrabold text-white" style="font-size: clamp(30px, 5vw, 44px); letter-spacing: -1.5px; line-height: 1.1;">
+          {post.data.title}
+        </h1>
+        <p class="text-text-2 mt-4 text-[16px] leading-relaxed">{post.data.description}</p>
+      </header>
+
+      <hr class="border-border my-10" />
+
+      <div class="prose-dark">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  /* Tipografía de artículo — paleta del sitio, sin plugin typography */
+  .prose-dark {
+    color: var(--c-prose);
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .prose-dark h2 {
+    color: var(--c-text-1);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    margin: 2.5rem 0 1rem;
+  }
+  .prose-dark h3 {
+    color: var(--c-text-1);
+    font-weight: 700;
+    font-size: 19px;
+    margin: 2rem 0 0.75rem;
+  }
+  .prose-dark p {
+    margin: 1rem 0;
+  }
+  .prose-dark a {
+    color: #a8ff47;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-dark strong {
+    color: var(--c-text-1);
+  }
+  .prose-dark em {
+    color: var(--c-prose-em);
+  }
+  .prose-dark ul,
+  .prose-dark ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  .prose-dark ul {
+    list-style: disc;
+  }
+  .prose-dark ol {
+    list-style: decimal;
+  }
+  .prose-dark li {
+    margin: 0.4rem 0;
+  }
+  .prose-dark li::marker {
+    color: #a8ff47;
+  }
+  .prose-dark code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    color: #a8ff47;
+  }
+  .prose-dark pre {
+    background: var(--c-surface) !important;
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  .prose-dark pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: 13px;
+  }
+  .prose-dark blockquote {
+    border-left: 2px solid #a8ff47;
+    padding-left: 1.25rem;
+    margin: 1.5rem 0;
+    color: var(--c-text-2);
+    font-style: italic;
+  }
+  .prose-dark hr {
+    border-color: var(--c-border);
+    margin: 2.5rem 0;
+  }
+</style>

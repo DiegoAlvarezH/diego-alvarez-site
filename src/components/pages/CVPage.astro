@@ -1,0 +1,215 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SocialCard from '@/components/SocialCard.astro';
+import StatCounter from '@/components/StatCounter.astro';
+import Icon from '@/components/Icon.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { getLocalized } from '@/i18n/content';
+import { SKILLS, CERTIFICATIONS, SOCIALS } from '@/data/cv';
+import { render } from 'astro:content';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const experience = await getLocalized('experience', lang);
+const experienceRendered = await Promise.all(
+  experience.map(async (item) => ({ item, Content: (await render(item)).Content }))
+);
+
+const skills = SKILLS[lang];
+const certifications = CERTIFICATIONS[lang];
+
+const stats = [
+  { value: 5, suffix: '+', label: t('cv.stats.years') },
+  { value: 6, suffix: '', label: t('cv.stats.companies') },
+  { value: 40, suffix: '+', label: t('cv.stats.projects') },
+  { value: 3, suffix: '', label: t('cv.stats.ai') },
+];
+
+const chips = [
+  { label: t('cv.chip.location'), pin: true },
+  { label: t('cv.chip.remote') },
+  { label: t('cv.chip.toptal') },
+  { label: t('cv.chip.open') },
+];
+
+const title = `CV — Diego Alvarez · Senior Software & AI Engineer`;
+---
+
+<BaseLayout title={title}>
+  <main class="bg-bg min-h-screen">
+    <div class="max-w-[760px] mx-auto px-6 pt-32 pb-24">
+      <!-- Back link -->
+      <a
+        href={localePath(lang, '/')}
+        class="group font-mono text-accent text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
+      >
+        <span class="transition-transform duration-150 group-hover:-translate-x-1">←</span>
+        {t('cv.back')}
+      </a>
+
+      <!-- Hero block -->
+      <div class="reveal">
+        <h1 class="font-sans font-black text-white" style="font-size: clamp(40px, 7vw, 60px); letter-spacing: -2px;">
+          DIEGO ALVAREZ
+        </h1>
+        <p class="font-mono text-accent uppercase mt-2 text-[13px] tracking-[3px]">{t('cv.role')}</p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          {
+            chips.map((chip) => (
+              <span
+                class="font-mono text-text-2 flex items-center gap-1.5 text-[10px] tracking-[2px] rounded-[2px] bg-surface-2 border border-border"
+                style="padding: 4px 12px;"
+              >
+                {chip.pin && <Icon name="map-pin" size={10} class="text-accent" />}
+                {chip.label}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="reveal" style="--reveal-delay: 0.1s">
+        <div class="mt-8 grid grid-cols-4 gap-4 py-6 border-y border-border">
+          {
+            stats.map((stat) => (
+              <div class="text-center">
+                <p class="font-mono text-2xl md:text-3xl font-bold text-white">
+                  <StatCounter value={stat.value} suffix={stat.suffix} />
+                </p>
+                <p class="font-mono text-text-3 uppercase mt-1 text-[8px] tracking-[2px]">{stat.label}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Download button -->
+      <div class="reveal" style="--reveal-delay: 0.15s">
+        <div class="mt-8 flex flex-col items-start gap-2">
+          <a
+            href="/cv.pdf"
+            target="_blank"
+            rel="noopener"
+            class="font-sans font-bold uppercase text-black bg-accent px-10 py-4 w-full md:w-auto flex items-center justify-center md:justify-start gap-3 hover:bg-accent-dark hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-[15px] tracking-[3px] rounded-[2px] no-underline"
+          >
+            <Icon name="download" size={18} />
+            {t('cv.download')}
+          </a>
+          <span class="font-mono text-text-3 text-[9px]">{t('cv.updated')}</span>
+        </div>
+      </div>
+
+      <!-- Social links -->
+      <div class="reveal" style="--reveal-delay: 0.2s">
+        <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {SOCIALS.map((s) => <SocialCard icon={s.icon} label={s.label} value={s.value} href={s.href} />)}
+        </div>
+      </div>
+
+      <!-- Experience timeline -->
+      <section class="mt-16">
+        <div class="reveal">
+          <div class="flex items-center gap-2">
+            <Icon name="briefcase" size={14} class="text-accent" />
+            <p class="font-mono text-text-3 uppercase text-[9px] tracking-[4px]">{t('cv.experience')}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 relative">
+          <div
+            class="absolute left-0 top-0 bottom-0 w-px"
+            style="background: linear-gradient(to bottom, #A8FF47 0%, var(--c-border) 100%);"
+          >
+          </div>
+          <div class="flex flex-col gap-0">
+            {
+              experienceRendered.map(({ item, Content }, i) => (
+                <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+                  <div class="group pl-6 py-5 relative cursor-default border-b border-border transition-transform duration-200 hover:translate-x-1">
+                    <div class="absolute left-[-4px] top-6 w-2 h-2 rounded-full bg-accent transition-transform duration-200 group-hover:scale-150" />
+                    <div class="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <p class="text-white font-semibold text-sm">{item.data.role}</p>
+                        <p class="text-accent font-mono text-[11px] mt-0.5">{item.data.company}</p>
+                      </div>
+                      <div class="text-right">
+                        <span class="font-mono text-text-3 text-[10px] block">{item.data.period}</span>
+                        <span class="font-mono text-text-3 text-[9px]">{item.data.location}</span>
+                      </div>
+                    </div>
+                    <div class="text-text-2 text-[13px] mt-2 leading-relaxed">
+                      <Content />
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 mt-3">
+                      {item.data.tags.map((tag) => (
+                        <span class="font-mono text-text-2 px-2 py-0.5 text-[9px] border border-border rounded-[2px]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Skills grid -->
+      <section class="mt-16">
+        <div class="reveal">
+          <p class="font-mono text-text-3 uppercase text-[9px] tracking-[4px]">{t('cv.skills')}</p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {
+            skills.map((group, i) => (
+              <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+                <div>
+                  <p class="font-mono text-accent uppercase mb-3 text-[9px] tracking-[3px]">{group.group}</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    {group.items.map((skill) => (
+                      <span class="inline-block font-mono text-text-2 px-3 py-1 text-[10px] border border-border rounded-[2px] transition-colors duration-150 hover:border-accent hover:text-white">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Certifications -->
+      <section class="mt-16">
+        <div class="reveal">
+          <div class="flex items-center gap-2">
+            <Icon name="award" size={14} class="text-accent" />
+            <p class="font-mono text-text-3 uppercase text-[9px] tracking-[4px]">{t('cv.certifications')}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-3">
+          {
+            certifications.map((cert, i) => (
+              <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+                <div class="flex items-start gap-4 p-5 bg-surface border border-border rounded-[4px]">
+                  <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 border border-border-hover rounded-[4px]">
+                    <Icon name="graduation-cap" size={18} class="text-accent" />
+                  </div>
+                  <div>
+                    <p class="text-white text-sm font-semibold">{cert.title}</p>
+                    <p class="text-text-2 text-[12px] mt-1">{cert.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

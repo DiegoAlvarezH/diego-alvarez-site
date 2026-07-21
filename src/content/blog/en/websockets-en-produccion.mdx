@@ -1,0 +1,33 @@
+---
+title: 'WebSockets in production: what nobody tells you'
+description: 'Connection draining, backpressure, and why your heartbeat interval is wrong.'
+date: 'May 2026'
+tag: 'BACKEND'
+readTime: '8 min'
+featured: true
+order: 1
+---
+
+WebSocket tutorials end right where the real problems begin. After operating persistent connections at scale, these are the lessons that never make it into the docs.
+
+## Connection draining on deploys
+
+Every deploy kills all active connections. If your client doesn't implement reconnection with exponential backoff and jitter, you've just created a stampede: thousands of clients reconnecting in the same second against cold instances.
+
+```ts
+const delay = Math.min(30_000, base * 2 ** attempt) + Math.random() * 1_000;
+```
+
+The server carries responsibility too: send a `CLOSE` frame with code `1001 (Going Away)` before shutting down, and give the load balancer a grace period to drain.
+
+## Backpressure: the silent killer
+
+`ws.send()` doesn't block. If the client consumes slowly, messages pile up in the socket buffer until they blow up your process memory. Monitor `bufferedAmount` and enforce a policy: drop low-priority messages, coalesce intermediate updates, or close the connection.
+
+## Your heartbeat is wrong
+
+A ping every 30 seconds detects disconnection up to 30 seconds late, and one every 5 burns mobile battery for nothing. The right interval depends on the idle timeout of intermediate proxies (ALB: 60s default). Rule of thumb: heartbeat = proxy timeout / 2, and validate the `pong` — a TCP half-open happily accepts pings with nobody on the other end.
+
+## Takeaway
+
+WebSockets isn't "open a socket and done". It's a stateful distributed system, and state always collects its debt.

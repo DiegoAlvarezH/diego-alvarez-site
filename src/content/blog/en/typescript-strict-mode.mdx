@@ -1,0 +1,34 @@
+---
+title: 'TypeScript strict mode: the technical debt that pays itself'
+description: 'Why strict flags save more time than they cost.'
+date: 'Jan 2026'
+tag: 'TYPESCRIPT'
+readTime: '4 min'
+featured: false
+order: 5
+---
+
+Every project inheriting `"strict": false` has the same story: someone turned it off "to move fast" and three years later nobody dares turn it on. The numbers say otherwise.
+
+## The real cost of `strict: false`
+
+Without `strictNullChecks`, every property access is a gamble. The classic `Cannot read properties of undefined` isn't a JavaScript bug — it's a TypeScript configuration bug. The compiler *knew* that value could be `undefined` and you told it not to warn you.
+
+## Incremental migration without drama
+
+Don't flip everything on day one. The order that works:
+
+```jsonc
+// 1. Cheapest, highest return
+"noImplicitAny": true,
+// 2. The production-bug killer
+"strictNullChecks": true,
+// 3. The rest
+"strict": true
+```
+
+Combine it with `// @ts-expect-error` on existing red spots and one CI rule: zero new errors. Old debt gets paid per touched file, not in a big bang.
+
+## The return
+
+In a NestJS backend I migrated, `strictNullChecks` surfaced 47 potentially-null accesses. Twelve were real bugs reported by users in the previous six months. The compiler had them pinpointed for free — it just needed permission to speak.

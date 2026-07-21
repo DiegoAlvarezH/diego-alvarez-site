@@ -1,0 +1,38 @@
+---
+interface Props {
+  href: string;
+  date: string;
+  title: string;
+  tag: string;
+  excerpt?: string;
+  readTime?: string;
+}
+
+const { href, date, title, tag, excerpt, readTime } = Astro.props;
+---
+
+<a
+  href={href}
+  class="group flex items-center gap-6 px-4 py-5 cursor-pointer transition-colors duration-150 border-b border-border border-l-2 border-l-transparent hover:bg-surface hover:border-l-accent no-underline"
+>
+  <span class="font-mono text-[11px] text-text-3 w-20 flex-shrink-0">{date}</span>
+
+  <div class="flex-1 min-w-0">
+    <p class="text-white text-base font-semibold leading-snug">{title}</p>
+    {excerpt && <p class="text-text-2 text-[12px] mt-1 truncate">{excerpt}</p>}
+  </div>
+
+  {readTime && <span class="font-mono text-text-3 flex-shrink-0 text-[10px]">{readTime}</span>}
+
+  <span
+    class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 flex-shrink-0 text-accent border border-accent rounded-[2px]"
+  >
+    {tag}
+  </span>
+
+  <span
+    class="text-accent text-sm font-mono flex-shrink-0 opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0"
+  >
+    →
+  </span>
+</a>

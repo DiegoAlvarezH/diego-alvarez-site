@@ -1,0 +1,242 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HeroVideo from '@/components/HeroVideo.astro';
+import Marquee from '@/components/Marquee.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import StatCounter from '@/components/StatCounter.astro';
+import Icon from '@/components/Icon.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { getLocalized } from '@/i18n/content';
+import { MARQUEE_ITEMS } from '@/data/cv';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const projects = await getLocalized('projects', lang);
+
+const stats = [
+  { value: 5, suffix: '+', label: t('stats.years') },
+  { value: 3, suffix: '', label: t('stats.ai') },
+  { value: 40, suffix: '+', label: t('stats.projects') },
+  { value: 100, suffix: '%', label: t('stats.satisfaction') },
+];
+
+const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('contact.subject'))}&body=${encodeURIComponent(t('contact.body'))}`;
+
+const services = [
+  { icon: 'bot', title: t('services.agents.title'), desc: t('services.agents.desc') },
+  { icon: 'database', title: t('services.rag.title'), desc: t('services.rag.desc') },
+  { icon: 'zap', title: t('services.qa.title'), desc: t('services.qa.desc') },
+  { icon: 'cloud', title: t('services.cloud.title'), desc: t('services.cloud.desc') },
+  { icon: 'code', title: t('services.fullstack.title'), desc: t('services.fullstack.desc') },
+  { icon: 'sparkles', title: t('services.prompt.title'), desc: t('services.prompt.desc') },
+];
+---
+
+<BaseLayout>
+  <main class="bg-bg min-h-screen">
+    <!-- HERO -->
+    <section class="relative w-full force-dark" style="height: 100dvh;">
+      <HeroVideo />
+
+      <div class="absolute inset-0 z-10" style="background: rgba(0,0,0,0.35);"></div>
+      <div
+        class="absolute inset-0 z-10"
+        style="background: linear-gradient(to bottom, transparent 30%, #000000 100%);"
+      >
+      </div>
+      <div
+        class="absolute inset-0 z-10"
+        style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);"
+      >
+      </div>
+
+      <!-- Floating stats -->
+      <div class="hero-fade absolute top-24 right-8 z-20 text-right hidden md:block" style="--d: 1s">
+        <p class="font-mono text-3xl font-bold text-white leading-none">+TOP 3%</p>
+        <p class="font-mono text-[11px] tracking-[2px] text-text-2 mt-1">{t('hero.stat.toptal')}</p>
+      </div>
+
+      <!-- top-left: la esquina inferior izquierda la ocupan los CTA del hero (VER CV) -->
+      <div class="hero-fade absolute top-24 left-8 z-20 hidden md:block" style="--d: 1.1s">
+        <p class="font-mono text-3xl font-bold text-white leading-none">5+ YRS</p>
+        <p class="font-mono text-[11px] tracking-[2px] text-text-2 mt-1">{t('hero.stat.years')}</p>
+      </div>
+
+      <div class="hero-fade absolute bottom-24 right-8 z-20 text-right hidden md:block" style="--d: 1.2s">
+        <p class="font-mono text-3xl font-bold text-white leading-none">3 AI SYS</p>
+        <p class="font-mono text-[11px] tracking-[2px] text-text-2 mt-1">{t('hero.stat.ai')}</p>
+      </div>
+
+      <!-- Hero text -->
+      <div class="absolute z-20 bottom-0 left-0 right-0 px-[6%] pb-[8%]">
+        <div class="overflow-hidden">
+          <h1 class="font-sans uppercase leading-none text-left" style="letter-spacing: -4px; line-height: 0.88;">
+            <span class="hero-line block text-white" style="--d: 0.2s; font-size: clamp(64px, 10vw, 120px);">
+              {t('hero.line1')}
+            </span>
+            <span class="hero-line block text-white text-right" style="--d: 0.35s; font-size: clamp(64px, 10vw, 120px);">
+              {t('hero.line2')}
+            </span>
+            <span class="hero-line block text-right" style="--d: 0.5s; font-size: clamp(64px, 10vw, 120px);">
+              <span class="text-white">{t('hero.line3')}</span>
+              <span class="text-accent">{t('hero.line3accent')}</span>
+            </span>
+          </h1>
+        </div>
+
+        <p class="hero-fade text-text-2 mt-4 max-w-[480px] text-[15px] leading-relaxed" style="--d: 0.7s">
+          {t('hero.subtitle')}
+        </p>
+
+        <div class="hero-fade flex gap-3 mt-6 flex-wrap" style="--d: 0.7s">
+          <a
+            href={localePath(lang, '/cv')}
+            class="font-mono font-semibold uppercase bg-accent text-black px-7 py-3 flex items-center gap-2 hover:bg-accent-dark hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-[11px] tracking-[3px] rounded-[2px]"
+          >
+            {t('hero.cta.cv')}
+            <Icon name="arrow-right" size={14} />
+          </a>
+          <a
+            href={localePath(lang, '/blog')}
+            class="font-mono uppercase text-text-2 px-7 py-3 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-[11px] tracking-[3px] rounded-[2px]"
+            style="border: 1px solid rgba(255,255,255,0.2); background: transparent;"
+          >
+            {t('hero.cta.blog')}
+          </a>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="hero-fade absolute bottom-6 left-1/2 -translate-x-1/2 z-20 hidden md:flex flex-col items-center gap-2" style="--d: 1.5s">
+        <span class="font-mono text-[8px] tracking-[3px] uppercase text-text-3">{t('hero.scroll')}</span>
+        <div class="scroll-pulse w-px h-8 bg-gradient-to-b from-accent to-transparent"></div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <Marquee items={MARQUEE_ITEMS} speed={35} />
+
+    <!-- STATS -->
+    <section class="bg-bg px-[6%] py-20">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {
+          stats.map((stat, i) => (
+            <div class="reveal" style={`--reveal-delay: ${i * 0.1}s`}>
+              <div class="flex flex-col items-center text-center md:items-start md:text-left">
+                <p class="font-mono text-4xl md:text-5xl font-bold text-white leading-none">
+                  <StatCounter value={stat.value} suffix={stat.suffix} />
+                </p>
+                <p class="font-mono text-text-3 uppercase mt-3 text-[9px] tracking-[3px]">{stat.label}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="bg-bg px-[6%] py-16">
+      <div class="reveal">
+        <p class="font-mono uppercase text-text-3 text-[9px] tracking-[5px]">{t('services.label')}</p>
+        <h2 class="font-sans font-extrabold text-white mt-3" style="font-size: clamp(28px, 4vw, 44px); letter-spacing: -1.5px;">
+          {t('services.title')}
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-8">
+        {
+          services.map((s, i) => (
+            <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+              <ServiceCard {...s} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="bg-bg w-full pt-12 pb-16">
+      <div class="reveal">
+        <p class="font-mono uppercase text-text-3 px-[6%] text-[9px] tracking-[5px]">{t('projects.label')}</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 px-[6%] mt-6">
+        {
+          projects.map((p, i) => (
+            <div class="reveal" style={`--reveal-delay: ${i * 0.1}s`}>
+              <ProjectCard
+                tag={p.data.tag}
+                name={p.data.name}
+                desc={p.data.desc}
+                tech={p.data.tech}
+                githubUrl={p.data.githubUrl}
+                demoUrl={p.data.demoUrl}
+                deprecated={p.data.deprecated}
+              />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- EXPLORE BLOCK -->
+    <section class="bg-bg px-[6%] py-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="reveal">
+          <a
+            href={localePath(lang, '/cv')}
+            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:scale-[1.01] no-underline"
+          >
+            <p class="text-accent text-3xl font-mono">↓</p>
+            <p class="font-mono text-white mt-4 text-[18px] tracking-[3px]">/CV</p>
+            <p class="text-text-2 mt-2 text-[13px]">{t('explore.cv.desc')}</p>
+            <p class="text-accent mt-4 font-mono text-sm">{t('explore.cv.cta')}</p>
+          </a>
+        </div>
+        <div class="reveal" style="--reveal-delay: 0.1s">
+          <a
+            href={localePath(lang, '/blog')}
+            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:scale-[1.01] no-underline"
+          >
+            <p class="text-accent text-3xl font-mono">✦</p>
+            <p class="font-mono text-white mt-4 text-[18px] tracking-[3px]">/BLOG</p>
+            <p class="text-text-2 mt-2 text-[13px]">{t('explore.blog.desc')}</p>
+            <p class="text-accent mt-4 font-mono text-sm">{t('explore.blog.cta')}</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="bg-bg px-[6%] py-24">
+      <div class="reveal">
+        <div
+          class="relative overflow-hidden p-12 md:p-20 text-center border border-border rounded-[4px]"
+          style="background: linear-gradient(135deg, var(--c-surface) 0%, var(--c-surface-2) 100%);"
+        >
+          <div
+            class="absolute inset-0 opacity-20"
+            style="background: radial-gradient(circle at 50% 50%, rgba(168,255,71,0.15) 0%, transparent 60%);"
+          >
+          </div>
+          <div class="relative z-10">
+            <p class="font-mono text-accent uppercase text-[10px] tracking-[5px]">{t('cta.label')}</p>
+            <h2 class="font-sans font-extrabold text-white mt-4" style="font-size: clamp(32px, 5vw, 56px); letter-spacing: -2px;">
+              {t('cta.title.pre')} <span class="text-accent">{t('cta.title.accent')}</span>
+            </h2>
+            <p class="text-text-2 mt-4 max-w-[500px] mx-auto text-[15px]">{t('cta.desc')}</p>
+            <a
+              href={mailto}
+              aria-label={t('contact.aria')}
+              class="font-mono font-semibold uppercase bg-accent text-black px-10 py-4 mt-8 inline-flex items-center gap-2 hover:bg-accent-dark hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-[13px] tracking-[3px] rounded-[2px]"
+            >
+              {t('cta.button')}
+              <Icon name="mail" size={16} />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

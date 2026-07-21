@@ -1,0 +1,26 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<BaseLayout title="404 — Diego Alvarez">
+  <main class="bg-bg min-h-screen flex items-center justify-center px-6">
+    <div class="text-center">
+      <p class="font-mono text-accent text-[10px] tracking-[5px] uppercase">ERROR 404</p>
+      <h1 class="font-sans font-black text-white mt-4" style="font-size: clamp(48px, 10vw, 96px); letter-spacing: -3px;">
+        404
+      </h1>
+      <p class="text-white text-lg font-semibold mt-2">{t('notfound.title')}</p>
+      <p class="text-text-2 mt-2 text-[14px]">{t('notfound.desc')}</p>
+      <a
+        href={localePath(lang, '/')}
+        class="font-mono font-semibold uppercase bg-accent text-black px-8 py-3.5 mt-8 inline-block hover:bg-accent-dark transition-colors duration-200 text-[11px] tracking-[3px] rounded-[2px] no-underline"
+      >
+        {t('notfound.cta')}
+      </a>
+    </div>
+  </main>
+</BaseLayout>

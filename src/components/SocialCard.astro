@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  icon: string;
+  label: string;
+  value: string;
+  href: string;
+}
+
+const { icon, label, value, href } = Astro.props;
+const external = href.startsWith('http');
+---
+
+<a
+  href={href}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener noreferrer' : undefined}
+  class="group flex items-center justify-between px-5 py-4 bg-surface border border-border rounded-[2px] transition-colors duration-200 hover:border-accent no-underline"
+>
+  <div class="flex items-center gap-3">
+    <Icon name={icon} size={16} class="text-text-2 flex-shrink-0" />
+    <div>
+      <p class="font-mono text-[9px] tracking-[2px] uppercase text-text-3">{label}</p>
+      <p class="text-white text-sm mt-0.5">{value}</p>
+    </div>
+  </div>
+  <span class="text-text-3 text-sm transition-transform duration-150 group-hover:translate-x-0.5">
+    ↗
+  </span>
+</a>

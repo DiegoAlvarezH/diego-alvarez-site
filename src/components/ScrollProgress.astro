@@ -1,0 +1,30 @@
+<div
+  id="scroll-progress"
+  class="fixed top-0 left-0 right-0 z-[60] h-[2px] origin-left bg-accent"
+  style="transform: scaleX(0); transition: transform 80ms linear;"
+  aria-hidden="true"
+>
+</div>
+
+<script>
+  let ticking = false;
+  function update() {
+    const bar = document.getElementById('scroll-progress');
+    if (bar) {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    }
+    ticking = false;
+  }
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true }
+  );
+  document.addEventListener('astro:page-load', update);
+</script>

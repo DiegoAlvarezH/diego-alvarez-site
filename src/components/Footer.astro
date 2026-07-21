@@ -1,0 +1,83 @@
+---
+import Icon from './Icon.astro';
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('contact.subject'))}&body=${encodeURIComponent(t('contact.body'))}`;
+---
+
+<footer class="bg-bg px-[6%] py-16 border-t border-border">
+  <div class="max-w-[1200px] mx-auto">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+      <div>
+        <p class="font-mono text-white text-sm tracking-[2px] uppercase">D · ALVAREZ</p>
+        <p class="text-text-2 mt-2 text-[13px]">{t('footer.tagline')}</p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a
+          href="https://github.com/DiegoAlvarezH"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub"
+          class="text-text-2 hover:text-accent hover:-translate-y-[3px] transition-all duration-200"
+        >
+          <Icon name="github" size={20} />
+        </a>
+        <a
+          href="https://linkedin.com/in/diegoalvarezh"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          class="text-text-2 hover:text-accent hover:-translate-y-[3px] transition-all duration-200"
+        >
+          <Icon name="linkedin" size={20} />
+        </a>
+        <a
+          href={mailto}
+          aria-label={t('contact.aria')}
+          class="text-text-2 hover:text-accent hover:-translate-y-[3px] transition-all duration-200"
+        >
+          <Icon name="mail" size={20} />
+        </a>
+        <button
+          id="back-to-top"
+          class="ml-2 flex items-center gap-2 font-mono text-[10px] tracking-[2px] uppercase text-text-2 border border-border px-4 py-2.5 rounded-[2px] transition-all duration-200 hover:border-accent hover:text-accent hover:-translate-y-[3px] active:scale-95"
+        >
+          <Icon name="arrow-up" size={14} />
+          {t('footer.top')}
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+    >
+      <p class="font-mono text-text-3 text-[10px] tracking-[1px]">
+        © {year} Diego Alvarez — {t('footer.rights')}
+      </p>
+      <p class="font-mono text-text-3 text-[10px] tracking-[1px]">
+        {t('footer.built')}
+        <a
+          href="https://astro.build"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-text-2 hover:text-accent transition-colors duration-200"
+        >Astro</a>
+        <span class="text-accent">&hearts;</span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function initFooter() {
+    document.getElementById('back-to-top')?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+  initFooter();
+  document.addEventListener('astro:page-load', initFooter);
+</script>

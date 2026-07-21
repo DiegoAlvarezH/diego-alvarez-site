@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens de tema — dark por defecto, light vía [data-theme='light'] ── */
+:root {
+  --c-bg: #000000;
+  --c-surface: #080808;
+  --c-surface-2: #0d0d0d;
+  --c-border: #1a1a1a;
+  --c-border-hover: #2a2a2a;
+  --c-text-1: #ffffff;
+  --c-text-2: #888888;
+  --c-text-3: #444444;
+  --c-prose: #b5b5b5;
+  --c-prose-em: #d5d5d5;
+}
+
+:root[data-theme='light'] {
+  --c-bg: #fafafa;
+  --c-surface: #ffffff;
+  --c-surface-2: #f2f2f2;
+  --c-border: #e4e4e4;
+  --c-border-hover: #cccccc;
+  --c-text-1: #0a0a0a;
+  --c-text-2: #555555;
+  --c-text-3: #9a9a9a;
+  --c-prose: #3c3c3c;
+  --c-prose-em: #2a2a2a;
+}
+
+/* El hero corre sobre video oscuro: fuerza tokens dark sin importar el tema */
+.force-dark {
+  --c-text-1: #ffffff;
+  --c-text-2: #888888;
+  --c-text-3: #444444;
+}
+
+@layer base {
+  html {
+    background-color: var(--c-bg);
+    color: var(--c-text-1);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--c-bg);
+    font-family: 'Geist', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::selection {
+    background-color: rgba(168, 255, 71, 0.25);
+    color: var(--c-text-1);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--c-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--c-border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--c-border-hover);
+  }
+
+  :focus-visible {
+    outline: 1px solid #a8ff47;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ── Reveal on scroll (reemplaza framer-motion useInView) ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Hero line entrance ── */
+@keyframes hero-line {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-line {
+  opacity: 0;
+  animation: hero-line 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero-fade {
+  opacity: 0;
+  animation: hero-fade 0.6s ease forwards;
+  animation-delay: var(--d, 0s);
+}
+
+/* ── Marquee ── */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-scroll var(--marquee-speed, 35s) linear infinite;
+}
+
+/* ── Scroll indicator ── */
+@keyframes scroll-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.scroll-pulse {
+  animation: scroll-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Reduced motion: todo visible, nada animado ── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal,
+  .hero-line,
+  .hero-fade {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+  }
+
+  .marquee-track,
+  .scroll-pulse {
+    animation: none;
+  }
+}

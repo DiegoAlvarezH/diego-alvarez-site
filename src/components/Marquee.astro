@@ -1,0 +1,22 @@
+---
+interface Props {
+  items: string[];
+  speed?: number;
+}
+
+const { items, speed = 35 } = Astro.props;
+const repeated = [...items, ...items];
+---
+
+<div class="relative overflow-hidden py-4 border-y border-border">
+  <div class="marquee-track flex gap-8 whitespace-nowrap w-max" style={`--marquee-speed: ${speed}s`}>
+    {
+      repeated.map((item) => (
+        <span class="font-mono text-[11px] tracking-[3px] uppercase text-text-2 flex items-center gap-8">
+          {item}
+          <span class="text-accent">✦</span>
+        </span>
+      ))
+    }
+  </div>
+</div>

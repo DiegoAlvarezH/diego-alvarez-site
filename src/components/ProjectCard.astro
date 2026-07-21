@@ -1,0 +1,91 @@
+---
+import Icon from '@/components/Icon.astro';
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+
+interface Props {
+  tag: string;
+  name: string;
+  desc: string;
+  tech: string[];
+  githubUrl?: string | null;
+  demoUrl?: string | null;
+  deprecated?: boolean;
+}
+
+const { tag, name, desc, tech, githubUrl = null, demoUrl = null, deprecated = false } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const hasLinks = Boolean(githubUrl || demoUrl);
+---
+
+<div
+  class:list={[
+    'group relative flex flex-col p-6 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:-translate-y-1',
+    deprecated && 'opacity-60 hover:opacity-100',
+  ]}
+>
+  <div class="flex items-center gap-2 self-start">
+    <span
+      class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]"
+    >
+      {tag}
+    </span>
+    {
+      deprecated && (
+        <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-text-3 border border-border rounded-[2px]">
+          {t('projects.deprecated')}
+        </span>
+      )
+    }
+  </div>
+
+  <h3 class="text-white text-base font-semibold mt-3">{name}</h3>
+  <p class="text-text-2 text-[13px] leading-relaxed mt-1.5">{desc}</p>
+
+  <div class="flex flex-wrap gap-1.5 mt-4">
+    {
+      tech.map((t) => (
+        <span class="font-mono text-[10px] text-text-2 px-2 py-0.5 border border-border rounded-[2px]">
+          {t}
+        </span>
+      ))
+    }
+  </div>
+
+  {
+    hasLinks && (
+      <div class="flex flex-wrap gap-2 mt-5">
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-mono text-[10px] tracking-[2px] uppercase text-text-2 px-3 py-1.5 inline-flex items-center gap-1.5 border border-border rounded-[2px] transition-colors duration-150 hover:text-accent hover:border-accent"
+          >
+            <Icon name="github" size={13} />
+            {t('projects.github')}
+          </a>
+        )}
+        {demoUrl && (
+          <a
+            href={demoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-mono text-[10px] tracking-[2px] uppercase text-black bg-accent px-3 py-1.5 inline-flex items-center gap-1.5 rounded-[2px] transition-all duration-150 hover:bg-accent-dark"
+          >
+            <Icon name="globe" size={13} />
+            {t('projects.demo')}
+          </a>
+        )}
+      </div>
+    )
+  }
+
+  {
+    !hasLinks && (
+      <span class="absolute bottom-5 right-5 text-accent text-base font-mono opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0">
+        →
+      </span>
+    )
+  }
+</div>

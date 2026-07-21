@@ -1,0 +1,114 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BlogRow from '@/components/BlogRow.astro';
+import Icon from '@/components/Icon.astro';
+import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { getLocalized, stripLang } from '@/i18n/content';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const posts = await getLocalized('blog', lang);
+const featured = posts.find((p) => p.data.featured);
+const rest = posts.filter((p) => !p.data.featured);
+
+const postHref = (id: string) => localePath(lang, `/blog/${stripLang(id)}`);
+const title = `Blog — Diego Alvarez`;
+---
+
+<BaseLayout title={title} description={t('blog.subtitle')}>
+  <main class="bg-bg min-h-screen">
+    <div class="max-w-[900px] mx-auto px-6 pt-32 pb-24">
+      <!-- Back link -->
+      <a
+        href={localePath(lang, '/')}
+        class="group font-mono text-accent text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
+      >
+        <span class="transition-transform duration-150 group-hover:-translate-x-1">←</span>
+        {t('cv.back')}
+      </a>
+
+      <!-- Header -->
+      <div class="reveal">
+        <p class="font-mono text-accent uppercase text-[9px] tracking-[5px]">{t('blog.label')}</p>
+        <h1 class="font-sans font-extrabold text-white mt-3" style="font-size: clamp(36px, 6vw, 52px); letter-spacing: -2px;">
+          {t('blog.title')}
+        </h1>
+        <p class="text-text-2 mt-3 text-[15px]">{t('blog.subtitle')}</p>
+      </div>
+
+      <!-- Featured post -->
+      {
+        featured && (
+          <div class="reveal" style="--reveal-delay: 0.1s">
+            <a
+              href={postHref(featured.id)}
+              class="group mt-10 block relative overflow-hidden cursor-pointer p-8 md:p-10 border border-border rounded-[4px] transition-colors duration-200 hover:border-accent no-underline"
+              style="background: linear-gradient(135deg, var(--c-surface) 0%, var(--c-surface-2) 100%);"
+            >
+              <div
+                class="absolute inset-0 opacity-20"
+                style="background: radial-gradient(circle at 80% 20%, rgba(168,255,71,0.15) 0%, transparent 50%);"
+              />
+              <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]">
+                    {featured.data.tag}
+                  </span>
+                  <span class="font-mono text-text-3 flex items-center gap-1 text-[10px]">
+                    <Icon name="clock" size={10} />
+                    {featured.data.readTime}
+                  </span>
+                  <span class="font-mono text-text-3 text-[10px]">★ {t('blog.featured')}</span>
+                </div>
+                <h2 class="font-sans font-bold text-white" style="font-size: clamp(22px, 3vw, 32px); letter-spacing: -1px;">
+                  {featured.data.title}
+                </h2>
+                <p class="text-text-2 mt-3 text-[14px] leading-relaxed">{featured.data.description}</p>
+                <div class="flex items-center justify-between mt-6">
+                  <span class="font-mono text-text-3 text-[10px]">{featured.data.date}</span>
+                  <span class="text-accent font-mono text-sm flex items-center gap-1 transition-transform duration-150 group-hover:translate-x-1">
+                    {t('blog.read')}
+                    <Icon name="arrow-right" size={14} />
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        )
+      }
+
+      <!-- Post list -->
+      <div class="mt-10 border-t border-border">
+        {
+          rest.map((post, i) => (
+            <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+              <BlogRow
+                href={postHref(post.id)}
+                date={post.data.date}
+                title={post.data.title}
+                tag={post.data.tag}
+                excerpt={post.data.description}
+                readTime={post.data.readTime}
+              />
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Empty state -->
+      <div class="reveal" style="--reveal-delay: 0.3s">
+        <div class="mt-12 text-center">
+          <p class="font-mono text-text-3 text-[11px] tracking-[2px]">{t('blog.empty')}</p>
+          <a
+            href={localePath(lang, '/cv')}
+            class="font-mono text-accent mt-4 inline-flex items-center gap-2 text-[11px] tracking-[2px] hover:scale-[1.02] transition-transform duration-150 no-underline"
+          >
+            <span class="uppercase">{t('blog.follow')}</span>
+            <Icon name="arrow-right" size={14} />
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

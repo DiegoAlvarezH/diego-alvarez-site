@@ -1,0 +1,31 @@
+---
+title: 'Clean Architecture no es una excusa para sobre-ingenierizar'
+description: 'Cuándo las capas ayudan y cuándo solo agregan indirección.'
+date: 'Mar 2026'
+tag: 'ARCHITECTURE'
+readTime: '5 min'
+featured: false
+order: 3
+---
+
+He visto CRUDs de tres endpoints con `UserRepositoryInterface`, `UserRepositoryImpl`, `UserUseCase`, `UserDTOMapper` y `UserPresenter`. Cinco archivos para leer una fila de Postgres. Eso no es Clean Architecture — es cargo cult.
+
+## La regla que importa
+
+Clean Architecture tiene una sola idea central: **las dependencias apuntan hacia adentro**. El dominio no conoce la base de datos, ni el framework, ni el transporte. Todo lo demás — las capas, los nombres, los diagramas de cebolla — son implementaciones de esa idea, no la idea.
+
+## Cuándo las capas pagan
+
+- El dominio tiene lógica real (reglas de negocio, invariantes, cálculos).
+- Vas a cambiar una pieza de infraestructura con probabilidad realista (no "algún día quizás Mongo").
+- Múltiples puntos de entrada usan la misma lógica: HTTP, colas, CLI, cron.
+
+## Cuándo son puro costo
+
+- CRUD directo sin reglas: el "caso de uso" solo delega al repositorio.
+- Una sola implementación por interfaz, para siempre.
+- El equipo pierde más tiempo navegando archivos que escribiendo lógica.
+
+## Mi heurística
+
+Empieza con handlers gordos y dominio anémico. Cuando un handler supera ~100 líneas o dos handlers duplican lógica de negocio, extrae el dominio. La arquitectura se descubre refactorizando, no se decreta en el día uno.

@@ -1,0 +1,31 @@
+---
+title: "Clean Architecture is not an excuse to over-engineer"
+description: 'When layers help and when they just add indirection.'
+date: 'Mar 2026'
+tag: 'ARCHITECTURE'
+readTime: '5 min'
+featured: false
+order: 3
+---
+
+I've seen three-endpoint CRUDs with `UserRepositoryInterface`, `UserRepositoryImpl`, `UserUseCase`, `UserDTOMapper`, and `UserPresenter`. Five files to read one Postgres row. That's not Clean Architecture — it's cargo cult.
+
+## The rule that matters
+
+Clean Architecture has a single core idea: **dependencies point inward**. The domain doesn't know about the database, the framework, or the transport. Everything else — the layers, the names, the onion diagrams — are implementations of that idea, not the idea itself.
+
+## When layers pay off
+
+- The domain has real logic (business rules, invariants, calculations).
+- You'll realistically swap an infrastructure piece (not "maybe Mongo someday").
+- Multiple entry points share the same logic: HTTP, queues, CLI, cron.
+
+## When they're pure cost
+
+- Straight CRUD with no rules: the "use case" just delegates to the repository.
+- One implementation per interface, forever.
+- The team spends more time navigating files than writing logic.
+
+## My heuristic
+
+Start with fat handlers and an anemic domain. When a handler passes ~100 lines or two handlers duplicate business logic, extract the domain. Architecture is discovered through refactoring, not decreed on day one.
