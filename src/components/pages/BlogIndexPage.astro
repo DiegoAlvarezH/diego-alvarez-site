@@ -9,8 +9,8 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const posts = await getLocalized('blog', lang);
-const featured = posts.find((p) => p.data.featured);
-const rest = posts.filter((p) => !p.data.featured);
+const featured = posts[posts.length - 1];
+const rest = posts.slice(0, -1).reverse();
 
 const postHref = (id: string) => localePath(lang, `/blog/${stripLang(id)}`);
 const title = `Blog — Diego Alvarez`;

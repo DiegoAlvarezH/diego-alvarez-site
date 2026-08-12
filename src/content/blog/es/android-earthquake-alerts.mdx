@@ -1,0 +1,115 @@
+---
+title: 'Por qué tu celular no te avisó a tiempo: lo que aprendí investigando las alertas de sismos en Colombia'
+description: 'Después de un sismo que nos tomó por sorpresa, investigué cómo funciona el sistema de alertas tempranas de Android, por qué en Colombia no siempre llega a tiempo, y por qué en iPhone ni siquiera existe.'
+date: 'Aug 2026'
+tag: 'ANDROID'
+readTime: '9 min'
+featured: true
+order: 8
+---
+
+![Alertas de terremotos de Android](/images/blog/post-android/eq-mapa-cobertura.png)
+
+Hace poco vivimos un sismo fuerte y, como le pasó a mucha gente a mi alrededor, el celular no dijo nada hasta que el piso ya se había movido. Después del susto vino la pregunta obvia: *¿no se supone que Android tiene un sistema de alertas de terremotos? ¿Por qué no sonó?*
+
+Esa pregunta se convirtió en una excusa perfecta para investigar en serio cómo funciona el **Android Earthquake Alerts System**, el sistema de alertas sísmicas que Google construyó usando el sensor más aburrido de tu teléfono: el acelerómetro. Lo que encontré me sorprendió por dos razones. La primera es lo elegante que es la ingeniería detrás: convertir miles de millones de celulares comunes en una red sísmica global. La segunda es que entender sus límites explica exactamente por qué, en un país como Colombia, la experiencia real puede ser tan distinta a la promesa.
+
+Este es el resumen de esa investigación, con datos reales del propio equipo de Google Research y de la literatura sobre sismología, más lo que pude verificar sobre el caso colombiano.
+
+## La idea central: ganarle segundos a la onda destructiva
+
+Todo terremoto libera dos tipos de ondas sísmicas principales, y la diferencia entre ellas es la que hace posible cualquier sistema de alerta temprana en el mundo:
+
+- **Ondas P (primarias):** viajan más rápido, pero son de baja amplitud. Son las que sacuden suavemente antes de que "empiece lo fuerte".
+- **Ondas S (secundarias):** viajan más lento, pero cargan mucha más energía y son las principales responsables del daño a edificios e infraestructura.
+
+Como las ondas P siempre llegan primero, hay una ventana de tiempo —de unos pocos segundos hasta más de un minuto, dependiendo de la distancia al epicentro— entre que el suelo empieza a moverse levemente y el momento en que llega la sacudida fuerte. Ese es el único margen que cualquier sistema de alerta temprana, sea con sismómetros profesionales o con celulares, tiene para avisar. No es magia ni predicción: es una carrera contra la propia física de las ondas.
+
+## Cómo un celular común se convierte en un sismógrafo
+
+Lo que hizo Google fue tomar el acelerómetro que ya trae cada Android —el mismo que detecta cuando giras la pantalla— y usarlo como un mini sismómetro de bolsillo. El pipeline, en términos simples, funciona así:
+
+1. **Detección local:** cuando el teléfono está quieto (por ejemplo, cargando en la mesita de noche) y el acelerómetro registra un patrón de vibración compatible con una onda P, el software del dispositivo lo distingue de otros movimientos comunes (alguien lo golpea, se cae, pasa un camión).
+2. **Reporte al servidor:** si la señal parece sísmica, el teléfono envía al servidor de detección de Google un mensaje minúsculo: la hora exacta y una ubicación aproximada (deliberadamente imprecisa, por privacidad).
+3. **Correlación masiva:** el servidor recibe estos reportes de miles de teléfonos en la misma zona casi al mismo tiempo. Si suficientes dispositivos cercanos reportan el mismo patrón en la misma ventana de tiempo, el sistema confirma que hay un sismo real (no un falso positivo de un solo celular) y empieza a estimar epicentro, profundidad y magnitud, todo en cuestión de segundos.
+4. **Difusión de la alerta:** con esa estimación, el servidor calcula qué tan fuerte va a sentirse el movimiento en cada zona cercana y dispara dos niveles de aviso: **"BeAware"** (alerta ligera, para sacudida leve) y **"Take Action"** (alerta prioritaria que toma control de la pantalla y suena incluso con el celular en silencio, para sacudida fuerte).
+
+Es, literalmente, ciencia ciudadana a escala planetaria: cada teléfono es un sensor, y la inteligencia real está en cómo el servidor combina miles de señales ruidosas e imperfectas para producir una estimación confiable en segundos.
+
+![Mapa global de detección y alertas del Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.png)
+
+*El sistema ya detecta y entrega alertas en decenas de países (verde), incluida buena parte de Latinoamérica. El rojo y el amarillo marcan sismos reales donde se emitieron alertas por sacudida fuerte y leve, respectivamente; el gris son detecciones donde no se llegó a alertar. Fuente: [Google Research, "Android Earthquake Alerts: A global system for early warning"](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## Los números detrás del sistema
+
+Estos son datos que Google publicó sobre el desempeño real del sistema, no proyecciones de laboratorio:
+
+- Para finales de 2023, el sistema ya operaba en **98 países**.
+- Ha detectado más de **18.000 sismos** y enviado más de **790 millones de alertas**.
+- El error en la estimación de magnitud bajó de **0.50 a 0.25** en tres años de ajustes al algoritmo.
+- Las primeras alertas suelen emitirse entre **8 y 18 segundos** después de iniciado el sismo.
+- La cobertura de sistemas de alerta temprana en el mundo pasó de unos **250 millones de personas** (con los sistemas nacionales tradicionales como los de Japón, México o Taiwán) a más de **2.500 millones** gracias, en gran parte, a que Android lo activó por defecto en miles de millones de teléfonos.
+
+![Gráfico de crecimiento del alcance global de los sistemas de alerta temprana de sismos](/images/blog/post-android/eq-alcance-global.png)
+
+*Antes de 2019, el acceso a alertas tempranas de sismos dependía de sistemas nacionales como el de Japón (JMA), México (SAS) o Estados Unidos (ShakeAlert). La barra verde muestra cómo Android multiplicó por diez el número de personas con acceso a algún tipo de alerta. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+Y cuando Google encuestó a más de 1.5 millones de usuarios que recibieron una alerta real, el 85% la calificó como "muy útil". Pero hay un dato dentro de esa misma encuesta que es clave para entender las quejas que uno escucha en Colombia: solo el **36% recibió la alerta antes de sentir la sacudida**; un 28% la recibió *durante* el movimiento y un 23% la recibió *después* de que ya había pasado.
+
+![Encuesta de retroalimentación de usuarios sobre las alertas sísmicas](/images/blog/post-android/eq-feedback-usuarios.png)
+
+*Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## La "zona ciega": por qué cerca del epicentro casi nunca hay tiempo
+
+Este fue, para mí, el hallazgo que más explica la frustración de "el celular no avisó". Ningún sistema de alerta temprana —ni el de Google, ni ShakeAlert en Estados Unidos, ni el de Japón— puede avisarte con anticipación si estás **muy cerca del epicentro**. La razón es simple: si la onda P y la onda S salen casi al mismo tiempo y tú estás a pocos kilómetros de origen, ambas te llegan casi juntas. No hay ventana que aprovechar.
+
+Los propios datos de Google lo muestran con crudeza: en sismos de magnitud 6.7 y 5.7 analizados en Filipinas y Nepal, entre más fuerte era la sacudida sentida (más cerca del epicentro), **menor —o incluso negativo— era el tiempo de aviso**. Es decir: justo donde el sismo pega más duro, es donde el sistema tiene menos margen para avisar antes de que llegue.
+
+![Gráficos de tiempo de aviso según intensidad de sacudida en sismos de Filipinas y Nepal](/images/blog/post-android/eq-tiempo-aviso.png)
+
+*Cada punto es un teléfono real. A mayor intensidad de sacudida (más cerca del epicentro), el tiempo de aviso se acerca a cero o incluso llega después de que empezó a temblar. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+Esto no es un defecto exclusivo del sistema de Android: es una limitación física de cualquier alerta temprana sísmica. Y también explica por qué, en el terremoto de Turquía-Siria de 2023, el sistema subestimó gravemente la magnitud (la calculó entre 4.5 y 4.9 cuando en realidad fue de 7.8) y solo unas 469 personas recibieron la alerta de "Take Action" cuando debieron ser cerca de 10 millones. El propio Google reconoció la falla y la usó para mejorar sus algoritmos.
+
+![Evolución del error de magnitud del Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.png)
+
+*El margen de error en la estimación de magnitud ha bajado de forma constante desde 2021, pero sigue existiendo, especialmente en la primera estimación (línea naranja) frente a sismos grandes cercanos. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## ¿Y qué pasa realmente en Colombia?
+
+Aquí es donde mi investigación se puso más interesante, porque hay que separar dos cosas que suelen confundirse:
+
+**La detección sísmica oficial en Colombia** la hace el Servicio Geológico Colombiano (SGC) a través de la Red Sismológica Nacional, con más de un centenar de estaciones sismológicas repartidas por el territorio. Ese es un sistema de monitoreo y análisis científico, pero —a diferencia de Japón, México o California— Colombia no cuenta hoy con un sistema propio, oficial y a nivel de Estado, de *alerta temprana* que le llegue al ciudadano por notificación antes de que tiemble.
+
+**Lo que sí existe en Colombia** es la capa de Google: según su propio mapa de cobertura, el Android Earthquake Alerts System detecta y alerta en buena parte de Suramérica, Colombia incluida, porque —a diferencia de ShakeAlert— este sistema no depende de que exista un acuerdo con una agencia gubernamental local: le basta con que haya suficientes teléfonos Android activos y con los permisos correctos en una zona. Es decir, la promesa técnica sí llega hasta acá.
+
+El problema es que "estar cubierto en el mapa" no es lo mismo que "la alerta te llega a tiempo, todas las veces". En la práctica, en Colombia se combinan varios factores que reducen la eficacia real:
+
+- **La zona ciega cerca del epicentro**, que ya vimos que es un límite físico y no solo tecnológico, es especialmente relevante en un país con sismicidad superficial y epicentros a veces muy cerca de zonas pobladas.
+- **Densidad de teléfonos con Android y ubicación/datos activados.** El sistema necesita una masa crítica de dispositivos reportando casi al mismo tiempo para confirmar el sismo con confianza; en zonas con menor penetración de smartphones o con el GPS/Wi-Fi apagado, la confirmación puede tardar más o no alcanzar el umbral.
+- **Configuración del propio teléfono.** El sistema requiere tener activadas explícitamente la opción "Alertas de terremotos", la ubicación y una conexión de datos o Wi-Fi; muchas personas simplemente no saben que existe o la tienen desactivada.
+- **Ausencia de una alerta oficial complementaria.** En países como Japón o México, la alerta de Android convive con un sistema estatal que usa sismómetros dedicados (mucho más sensibles y con mejor cobertura instrumental) como respaldo. En Colombia, ese respaldo institucional en tiempo real —integrado a nivel de notificación masiva— todavía no existe.
+
+En otras palabras: la tecnología de Google sí "vive" en los celulares colombianos, pero el ecosistema completo que la hace realmente confiable (buena densidad de sensores, activación consciente por parte del usuario, y una red institucional de respaldo) todavía está incompleto.
+
+## ¿Y por qué en iPhone esto no existe?
+
+Esta fue la pregunta que más me costó responder, y la respuesta tiene menos que ver con sismología y más con arquitectura de sistemas operativos y modelos de negocio.
+
+El Android Earthquake Alerts System funciona porque Google controla el sistema operativo de punta a punta: puede darle a Google Play Services acceso de bajo nivel y en segundo plano al acelerómetro de *cualquier* Android, de forma continua y con bajo consumo de batería, sin pedirle permiso explícito a cada app. Esa integración profunda a nivel de sistema operativo es la pieza que hace posible convertir miles de millones de teléfonos en una red sísmica silenciosa.
+
+Apple, en cambio, restringe deliberadamente el acceso continuo en segundo plano a los sensores de movimiento por razones de privacidad y ahorro de batería: una app normal en iOS no puede quedarse "escuchando" el acelerómetro todo el tiempo sin que el sistema la frene. Construir un equivalente requeriría que Apple lo implementara como una función nativa de iOS, con el mismo nivel de acceso privilegiado que Google le dio a su propio sistema, y hasta ahora esa decisión de producto no se ha tomado. De hecho, en Estados Unidos, USGS ha buscado integrar ShakeAlert de forma nativa en iPhone y Apple no lo ha adoptado; hoy los iPhone en zonas con ShakeAlert solo reciben avisos sísmicos a través de las Alertas de Emergencia Inalámbricas (WEA), un mecanismo de difusión por antenas celulares —el mismo que usan las alertas AMBER— que depende de que exista una agencia oficial emitiéndolas en ese país. Colombia no tiene ese mecanismo activado para sismos, así que, en la práctica, hoy un iPhone en Colombia no tiene ninguna vía de alerta sísmica automática: ni la red crowdsourced de Google (que es exclusiva de Android) ni un WEA sísmico oficial.
+
+## Lo que me deja esta investigación
+
+Ninguna alerta, por bien diseñada que esté, va a avisarte con tiempo si estás justo encima del epicentro: ahí la física no da tregua. Pero para todos los demás casos —que son la mayoría en un sismo mediano o grande— sí hay una ventana real de varios segundos que se puede aprovechar, y esa ventana depende de cosas muy concretas y muy poco glamorosas: tener Android actualizado, la ubicación y los datos activados, la opción de alertas de terremotos encendida, y —a nivel país— invertir en que exista una capa institucional de respaldo que no dependa solo de que Silicon Valley decida cubrirnos.
+
+Si algo bueno saco de haber sentido ese sismo sin aviso, es entender que la próxima vez el problema puede no ser "que la tecnología no sirve", sino que nunca activamos correctamente lo que ya traíamos en el bolsillo.
+
+---
+
+### Fuentes
+
+- Stogaitis, M. et al. [*Android Earthquake Alerts: A global system for early warning*](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/). Google Research Blog.
+- Servicio Geológico Colombiano (SGC) — Red Sismológica Nacional de Colombia.

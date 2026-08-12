@@ -1,0 +1,115 @@
+---
+title: 'Why Your Phone Didn’t Warn You in Time: What I Learned Investigating Earthquake Alerts in Colombia'
+description: 'After an earthquake caught us off guard, I dug into how Android’s early warning system actually works, why it doesn’t always arrive in time in Colombia, and why it doesn’t even exist on iPhone.'
+date: 'Aug 2026'
+tag: 'ANDROID'
+readTime: '9 min'
+featured: true
+order: 8
+---
+
+![Android Earthquake Alerts](/images/blog/post-android/eq-mapa-cobertura.png)
+
+We recently went through a strong earthquake and, like a lot of people around me, my phone said nothing until the ground had already started shaking. After the scare came the obvious question: *isn't Android supposed to have an earthquake alert system? Why didn't it go off?*
+
+That question turned into the perfect excuse to seriously research how the **Android Earthquake Alerts System** works — the seismic alert system Google built using the most boring sensor in your phone: the accelerometer. What I found surprised me for two reasons. The first is how elegant the engineering behind it actually is: turning billions of ordinary phones into a global seismic network. The second is that understanding its limits explains exactly why, in a country like Colombia, the real-world experience can be so different from the promise.
+
+This is the summary of that research, backed by real data from Google Research's own team and the seismology literature, plus what I could verify about the Colombian case.
+
+## The core idea: racing the destructive wave by a few seconds
+
+Every earthquake releases two main types of seismic waves, and the difference between them is what makes any early warning system in the world possible:
+
+- **P waves (primary):** travel faster, but with low amplitude. They're the ones that shake gently before "the real thing" starts.
+- **S waves (secondary):** travel slower, but carry much more energy and are the main cause of damage to buildings and infrastructure.
+
+Because P waves always arrive first, there's a time window — from a few seconds up to more than a minute, depending on the distance to the epicenter — between the ground starting to move slightly and the moment the strong shaking hits. That's the only margin any early warning system, whether built on professional seismometers or phones, has to warn people. It's not magic or prediction: it's a race against the physics of the waves themselves.
+
+## How an ordinary phone becomes a seismograph
+
+What Google did was take the accelerometer already built into every Android phone — the same one that detects when you rotate the screen — and turn it into a pocket-sized mini seismometer. The pipeline, in simple terms, works like this:
+
+1. **Local detection:** when the phone is still (for example, charging on a nightstand) and the accelerometer picks up a vibration pattern consistent with a P wave, the device's software distinguishes it from other common movements (someone bumping it, dropping it, a truck passing by).
+2. **Reporting to the server:** if the signal looks seismic, the phone sends Google's detection server a tiny message: the exact time and an approximate location (deliberately imprecise, for privacy).
+3. **Mass correlation:** the server receives these reports from thousands of phones in the same area almost simultaneously. If enough nearby devices report the same pattern within the same time window, the system confirms a real earthquake (not a false positive from a single phone) and starts estimating epicenter, depth, and magnitude — all within seconds.
+4. **Alert distribution:** with that estimate, the server calculates how strong the shaking will feel in each nearby area and triggers two alert levels: **"BeAware"** (a light alert for mild shaking) and **"Take Action"** (a priority alert that takes over the screen and sounds even with the phone on silent, for strong shaking).
+
+It's literally citizen science at a planetary scale: every phone is a sensor, and the real intelligence lies in how the server combines thousands of noisy, imperfect signals into a reliable estimate within seconds.
+
+![Global map of detections and alerts from the Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.png)
+
+*The system already detects and delivers alerts in dozens of countries (green), including much of Latin America. Red and yellow mark real earthquakes where strong-shaking and light-shaking alerts were issued, respectively; gray marks detections where no alert was sent. Source: [Google Research, "Android Earthquake Alerts: A global system for early warning"](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## The numbers behind the system
+
+These are figures Google itself published about the system's real-world performance, not lab projections:
+
+- By the end of 2023, the system was already running in **98 countries**.
+- It has detected more than **18,000 earthquakes** and sent more than **790 million alerts**.
+- The magnitude estimation error dropped from **0.50 to 0.25** over three years of algorithm tuning.
+- The first alerts are typically issued between **8 and 18 seconds** after the earthquake starts.
+- Global coverage of early warning systems went from around **250 million people** (with traditional national systems like Japan's, Mexico's, or Taiwan's) to more than **2.5 billion**, largely because Android enabled it by default on billions of phones.
+
+![Growth chart of global reach of earthquake early warning systems](/images/blog/post-android/eq-alcance-global.png)
+
+*Before 2019, access to earthquake early warnings depended on national systems like Japan's (JMA), Mexico's (SAS), or the United States' (ShakeAlert). The green bar shows how Android multiplied by ten the number of people with access to some form of alert. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+And when Google surveyed more than 1.5 million users who received a real alert, 85% rated it as "very useful." But there's a data point buried in that same survey that's key to understanding the complaints you hear in Colombia: only **36% received the alert before feeling the shaking**; 28% received it *during* the shaking, and 23% received it *after* it had already passed.
+
+![User feedback survey on earthquake alerts](/images/blog/post-android/eq-feedback-usuarios.png)
+
+*Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## The "blind zone": why there's almost never time near the epicenter
+
+This was, for me, the finding that best explains the frustration of "my phone didn't warn me." No early warning system — not Google's, not ShakeAlert in the United States, not Japan's — can warn you ahead of time if you're **very close to the epicenter**. The reason is simple: if the P wave and the S wave leave at nearly the same time and you're only a few kilometers from the source, both reach you almost together. There's no window left to exploit.
+
+Google's own data shows this bluntly: in magnitude 6.7 and 5.7 earthquakes analyzed in the Philippines and Nepal, the stronger the shaking felt (closer to the epicenter), **the lower — or even negative — the warning time was**. In other words: exactly where the earthquake hits hardest is where the system has the least margin to warn people before it arrives.
+
+![Warning time charts by shaking intensity in earthquakes in the Philippines and Nepal](/images/blog/post-android/eq-tiempo-aviso.png)
+
+*Each dot is a real phone. The higher the shaking intensity (closer to the epicenter), the closer the warning time gets to zero — or even arrives after the shaking already started. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+This isn't a defect exclusive to Android's system: it's a physical limitation of any seismic early warning. It also explains why, during the 2023 Turkey-Syria earthquake, the system severely underestimated the magnitude (it calculated between 4.5 and 4.9 when it was actually 7.8), and only about 469 people received the "Take Action" alert when roughly 10 million should have. Google itself acknowledged the failure and used it to improve its algorithms.
+
+![Evolution of the magnitude error of the Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.png)
+
+*The margin of error in magnitude estimation has steadily decreased since 2021, but it still exists, especially in the first estimate (orange line) for large, nearby earthquakes. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
+
+## So what's actually happening in Colombia?
+
+This is where my research got more interesting, because there are two things that tend to get confused:
+
+**Official seismic detection in Colombia** is handled by the Servicio Geológico Colombiano (SGC) through the National Seismological Network, with more than a hundred seismological stations spread across the country. That's a scientific monitoring and analysis system, but — unlike Japan, Mexico, or California — Colombia doesn't currently have its own official, state-level *early warning* system that reaches citizens through a notification before the shaking hits.
+
+**What does exist in Colombia** is Google's layer: according to its own coverage map, the Android Earthquake Alerts System detects and alerts across much of South America, Colombia included, because — unlike ShakeAlert — this system doesn't depend on a formal agreement with a local government agency. It just needs enough active Android phones with the right permissions in an area. In other words, the technical promise does reach us.
+
+The problem is that "being covered on the map" isn't the same as "the alert reaches you in time, every time." In practice, several factors combine in Colombia to reduce real-world effectiveness:
+
+- **The blind zone near the epicenter**, which we've already seen is a physical limit and not just a technological one, is especially relevant in a country with shallow seismicity and epicenters sometimes very close to populated areas.
+- **Density of Android phones with location/data enabled.** The system needs a critical mass of devices reporting almost simultaneously to confidently confirm an earthquake; in areas with lower smartphone penetration or with GPS/Wi-Fi turned off, confirmation can take longer or never reach the threshold.
+- **The phone's own settings.** The system requires explicitly enabling the "Earthquake Alerts" option, location, and a data or Wi-Fi connection; many people simply don't know it exists or have it turned off.
+- **The absence of a complementary official alert.** In countries like Japan or Mexico, Android's alert coexists with a state system that uses dedicated seismometers (much more sensitive and with better instrumental coverage) as a backup. In Colombia, that real-time institutional backup — integrated at the mass-notification level — still doesn't exist.
+
+In other words: Google's technology does "live" on Colombian phones, but the full ecosystem that makes it truly reliable (good sensor density, conscious activation by users, and an institutional backup network) is still incomplete.
+
+## And why doesn't this exist on iPhone?
+
+This was the hardest question for me to answer, and the answer has less to do with seismology and more with operating system architecture and business models.
+
+The Android Earthquake Alerts System works because Google controls the operating system end to end: it can give Google Play Services low-level, background access to the accelerometer of *any* Android phone, continuously and with low battery consumption, without asking each app for explicit permission. That deep OS-level integration is the piece that makes it possible to turn billions of phones into a silent seismic network.
+
+Apple, on the other hand, deliberately restricts continuous background access to motion sensors for privacy and battery-saving reasons: a regular app on iOS can't stay "listening" to the accelerometer all the time without the system throttling it. Building an equivalent would require Apple to implement it as a native iOS feature, with the same level of privileged access Google gave its own system — and so far, that product decision hasn't been made. In fact, in the United States, the USGS has tried to integrate ShakeAlert natively into iPhone, and Apple hasn't adopted it; today, iPhones in ShakeAlert zones only receive seismic warnings through Wireless Emergency Alerts (WEA), a cell-tower broadcast mechanism — the same one used for AMBER alerts — which depends on an official agency issuing them in that country. Colombia doesn't have that mechanism enabled for earthquakes, so in practice, an iPhone in Colombia today has no automatic seismic alert path at all: neither Google's crowdsourced network (which is Android-exclusive) nor an official seismic WEA.
+
+## What this research leaves me with
+
+No alert, no matter how well designed, is going to warn you in time if you're right above the epicenter: physics gives no quarter there. But for every other case — which is most of a medium or large earthquake — there really is a window of several seconds that can be used, and that window depends on things that are very concrete and not glamorous at all: keeping Android updated, having location and data enabled, having the earthquake alerts option turned on, and — at a country level — investing in an institutional backup layer that doesn't rely solely on Silicon Valley deciding to cover us.
+
+If there's one good thing I take from having felt that earthquake without any warning, it's understanding that next time the problem might not be "the technology doesn't work," but that we never properly activated what we already carry in our pocket.
+
+---
+
+### Sources
+
+- Stogaitis, M. et al. [*Android Earthquake Alerts: A global system for early warning*](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/). Google Research Blog.
+- Servicio Geológico Colombiano (SGC) — Colombian National Seismological Network.
