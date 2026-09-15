@@ -8,7 +8,7 @@ featured: true
 order: 8
 ---
 
-![Alertas de terremotos de Android](/images/blog/post-android/eq-mapa-cobertura.png)
+![Alertas de terremotos de Android](/images/blog/post-android/eq-mapa-cobertura.webp)
 
 Hace poco vivimos un sismo fuerte y, como le pasó a mucha gente a mi alrededor, el celular no dijo nada hasta que el piso ya se había movido. Después del susto vino la pregunta obvia: *¿no se supone que Android tiene un sistema de alertas de terremotos? ¿Por qué no sonó?*
 
@@ -36,7 +36,7 @@ Lo que hizo Google fue tomar el acelerómetro que ya trae cada Android —el mis
 
 Es, literalmente, ciencia ciudadana a escala planetaria: cada teléfono es un sensor, y la inteligencia real está en cómo el servidor combina miles de señales ruidosas e imperfectas para producir una estimación confiable en segundos.
 
-![Mapa global de detección y alertas del Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.png)
+![Mapa global de detección y alertas del Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.webp)
 
 *El sistema ya detecta y entrega alertas en decenas de países (verde), incluida buena parte de Latinoamérica. El rojo y el amarillo marcan sismos reales donde se emitieron alertas por sacudida fuerte y leve, respectivamente; el gris son detecciones donde no se llegó a alertar. Fuente: [Google Research, "Android Earthquake Alerts: A global system for early warning"](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
@@ -50,13 +50,13 @@ Estos son datos que Google publicó sobre el desempeño real del sistema, no pro
 - Las primeras alertas suelen emitirse entre **8 y 18 segundos** después de iniciado el sismo.
 - La cobertura de sistemas de alerta temprana en el mundo pasó de unos **250 millones de personas** (con los sistemas nacionales tradicionales como los de Japón, México o Taiwán) a más de **2.500 millones** gracias, en gran parte, a que Android lo activó por defecto en miles de millones de teléfonos.
 
-![Gráfico de crecimiento del alcance global de los sistemas de alerta temprana de sismos](/images/blog/post-android/eq-alcance-global.png)
+![Gráfico de crecimiento del alcance global de los sistemas de alerta temprana de sismos](/images/blog/post-android/eq-alcance-global.webp)
 
 *Antes de 2019, el acceso a alertas tempranas de sismos dependía de sistemas nacionales como el de Japón (JMA), México (SAS) o Estados Unidos (ShakeAlert). La barra verde muestra cómo Android multiplicó por diez el número de personas con acceso a algún tipo de alerta. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
 Y cuando Google encuestó a más de 1.5 millones de usuarios que recibieron una alerta real, el 85% la calificó como "muy útil". Pero hay un dato dentro de esa misma encuesta que es clave para entender las quejas que uno escucha en Colombia: solo el **36% recibió la alerta antes de sentir la sacudida**; un 28% la recibió *durante* el movimiento y un 23% la recibió *después* de que ya había pasado.
 
-![Encuesta de retroalimentación de usuarios sobre las alertas sísmicas](/images/blog/post-android/eq-feedback-usuarios.png)
+![Encuesta de retroalimentación de usuarios sobre las alertas sísmicas](/images/blog/post-android/eq-feedback-usuarios.webp)
 
 *Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
@@ -66,13 +66,13 @@ Este fue, para mí, el hallazgo que más explica la frustración de "el celular 
 
 Los propios datos de Google lo muestran con crudeza: en sismos de magnitud 6.7 y 5.7 analizados en Filipinas y Nepal, entre más fuerte era la sacudida sentida (más cerca del epicentro), **menor —o incluso negativo— era el tiempo de aviso**. Es decir: justo donde el sismo pega más duro, es donde el sistema tiene menos margen para avisar antes de que llegue.
 
-![Gráficos de tiempo de aviso según intensidad de sacudida en sismos de Filipinas y Nepal](/images/blog/post-android/eq-tiempo-aviso.png)
+![Gráficos de tiempo de aviso según intensidad de sacudida en sismos de Filipinas y Nepal](/images/blog/post-android/eq-tiempo-aviso.webp)
 
 *Cada punto es un teléfono real. A mayor intensidad de sacudida (más cerca del epicentro), el tiempo de aviso se acerca a cero o incluso llega después de que empezó a temblar. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
 Esto no es un defecto exclusivo del sistema de Android: es una limitación física de cualquier alerta temprana sísmica. Y también explica por qué, en el terremoto de Turquía-Siria de 2023, el sistema subestimó gravemente la magnitud (la calculó entre 4.5 y 4.9 cuando en realidad fue de 7.8) y solo unas 469 personas recibieron la alerta de "Take Action" cuando debieron ser cerca de 10 millones. El propio Google reconoció la falla y la usó para mejorar sus algoritmos.
 
-![Evolución del error de magnitud del Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.png)
+![Evolución del error de magnitud del Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.webp)
 
 *El margen de error en la estimación de magnitud ha bajado de forma constante desde 2021, pero sigue existiendo, especialmente en la primera estimación (línea naranja) frente a sismos grandes cercanos. Fuente: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 

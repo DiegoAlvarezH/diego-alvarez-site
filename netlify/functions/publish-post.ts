@@ -1,15 +1,32 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { Handler } from '@netlify/functions';
 
 const DEVTO_API_KEY = process.env.DEVTO_API_KEY!;
 const LINKEDIN_ACCESS_TOKEN = process.env.LINKEDIN_ACCESS_TOKEN!;
 const LINKEDIN_AUTHOR_URN = process.env.LINKEDIN_AUTHOR_URN!; // urn:li:person:XXXXXXXX
+const PUBLISH_SECRET = process.env.PUBLISH_SECRET;
+
+function isAuthorized(headerSecret: string | undefined): boolean {
+  if (!PUBLISH_SECRET || !headerSecret) return false;
+  const a = Buffer.from(headerSecret);
+  const b = Buffer.from(PUBLISH_SECRET);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  if (!isAuthorized(event.headers['x-publish-secret'])) {
+    return { statusCode: 401, body: 'Unauthorized' };
+  }
+
   const { title, description, url, tags, canonicalUrl } = JSON.parse(event.body ?? '{}');
+
+  if (!title || !description || !url) {
+    return { statusCode: 400, body: 'Missing required fields: title, description, url' };
+  }
 
   const results: Record<string, unknown> = {};
 

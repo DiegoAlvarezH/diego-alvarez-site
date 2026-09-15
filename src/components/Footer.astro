@@ -1,11 +1,14 @@
 ---
 import Icon from './Icon.astro';
-import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+import { getLangFromUrl, useTranslations, buildMailto } from '@/i18n/utils';
+import { SOCIALS } from '@/data/cv';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const year = new Date().getFullYear();
-const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('contact.subject'))}&body=${encodeURIComponent(t('contact.body'))}`;
+const mailto = buildMailto(t);
+const githubUrl = SOCIALS.find((s) => s.icon === 'github')!.href;
+const linkedinUrl = SOCIALS.find((s) => s.icon === 'linkedin')!.href;
 ---
 
 <footer class="bg-bg px-[6%] py-16 border-t border-border">
@@ -18,7 +21,7 @@ const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('cont
 
       <div class="flex items-center gap-4">
         <a
-          href="https://github.com/DiegoAlvarezH"
+          href={githubUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"
@@ -27,7 +30,7 @@ const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('cont
           <Icon name="github" size={20} />
         </a>
         <a
-          href="https://linkedin.com/in/diegoalvarezh"
+          href={linkedinUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="LinkedIn"

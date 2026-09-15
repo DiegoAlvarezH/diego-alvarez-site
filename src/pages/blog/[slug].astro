@@ -1,10 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
 import BlogPostPage from '@/components/pages/BlogPostPage.astro';
-import { stripLang } from '@/i18n/content';
+import { getLocalized, stripLang } from '@/i18n/content';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ id }) => id.startsWith('es/'));
+  const posts = await getLocalized('blog', 'es');
   return posts.map((post) => ({
     params: { slug: stripLang(post.id) },
     props: { post },

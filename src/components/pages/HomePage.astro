@@ -6,7 +6,7 @@ import ServiceCard from '@/components/ServiceCard.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import StatCounter from '@/components/StatCounter.astro';
 import Icon from '@/components/Icon.astro';
-import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { getLangFromUrl, useTranslations, localePath, buildMailto } from '@/i18n/utils';
 import { getLocalized } from '@/i18n/content';
 import { MARQUEE_ITEMS } from '@/data/cv';
 
@@ -21,7 +21,7 @@ const stats = [
   { value: 100, suffix: '%', label: t('stats.satisfaction') },
 ];
 
-const mailto = `mailto:diegoah905@gmail.com?subject=${encodeURIComponent(t('contact.subject'))}&body=${encodeURIComponent(t('contact.body'))}`;
+const mailto = buildMailto(t);
 
 const services = [
   { icon: 'bot', title: t('services.agents.title'), desc: t('services.agents.desc') },

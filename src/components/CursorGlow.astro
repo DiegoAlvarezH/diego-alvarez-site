@@ -8,13 +8,28 @@
 
 <script>
   if (!window.matchMedia('(pointer: coarse)').matches) {
-    window.addEventListener('mousemove', (e) => {
-      const glow = document.getElementById('cursor-glow');
-      if (!glow) return;
-      glow.style.left = `${e.clientX}px`;
-      glow.style.top = `${e.clientY}px`;
-      glow.style.opacity = '1';
-    });
+    let ticking = false;
+    let lastX = 0;
+    let lastY = 0;
+    window.addEventListener(
+      'mousemove',
+      (e) => {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const glow = document.getElementById('cursor-glow');
+          if (glow) {
+            glow.style.left = `${lastX}px`;
+            glow.style.top = `${lastY}px`;
+            glow.style.opacity = '1';
+          }
+          ticking = false;
+        });
+      },
+      { passive: true }
+    );
     window.addEventListener('mouseout', () => {
       const glow = document.getElementById('cursor-glow');
       if (glow) glow.style.opacity = '0';

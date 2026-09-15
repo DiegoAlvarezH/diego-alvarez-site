@@ -44,9 +44,9 @@ const hasLinks = Boolean(githubUrl || demoUrl);
 
   <div class="flex flex-wrap gap-1.5 mt-4">
     {
-      tech.map((t) => (
+      tech.map((techItem) => (
         <span class="font-mono text-[10px] text-text-2 px-2 py-0.5 border border-border rounded-[2px]">
-          {t}
+          {techItem}
         </span>
       ))
     }

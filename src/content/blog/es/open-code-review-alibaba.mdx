@@ -1,0 +1,108 @@
+---
+title: 'Open Code Review: Alibaba No Liberó una Herramienta, Liberó Su Ventaja'
+description: 'Alibaba acaba de abrir el código de su revisor de PRs con IA, el mismo que usa internamente desde hace dos años. La pregunta interesante no es qué hace, es por qué alguien libera algo así.'
+date: 'Sep 2026'
+tag: 'AI AGENTS'
+readTime: '8 min'
+featured: true
+order: 9
+---
+
+![Open Code Review de Alibaba](/images/blog/code-review-alibaba.webp)
+
+Cada semana sale una herramienta nueva que promete "revisar tu código con IA".
+
+La mayoría son un prompt con traje: le pegan el diff a un modelo, le piden que busque bugs, y esperan lo mejor.
+
+Por eso cuando vi que Alibaba abrió el código de **Open Code Review** — el mismo agente que usan internamente desde hace dos años para revisar el código de miles de ingenieros — no me llamó la atención la herramienta.
+
+Me llamó la atención la pregunta que deja en el aire.
+
+> **¿Por qué alguien libera algo que llevó dos años y millones de bugs detectados en construir?**
+
+---
+
+## El problema que ya conocemos todos
+
+Si has usado un agente general (Claude Code, Cursor, lo que sea) para pedirle "revisa este PR", probablemente reconoces el patrón:
+
+En diffs grandes, el agente revisa cinco archivos de veinte y da por hecho que ya terminó.
+
+Te marca un problema en la línea 47 cuando en realidad está en la 94.
+
+Un día te da una revisión brillante y al siguiente, con el mismo prompt, te da tres párrafos genéricos sobre "buenas prácticas".
+
+No es que el modelo sea malo. Es que revisar código con un prompt suelto no tiene ninguna garantía de cobertura, de precisión de ubicación, ni de consistencia. Es puro lenguaje natural intentando hacer el trabajo de un proceso determinístico.
+
+---
+
+## Lo que hace distinto a Open Code Review
+
+La apuesta de Alibaba no es "usemos un modelo más grande". Es dividir el trabajo según lo que cada pieza hace bien.
+
+**Ingeniería determinística** decide qué no puede fallar: qué archivos se revisan, cómo se agrupan los relacionados, qué reglas aplican a cada tipo de archivo. **El agente** se queda con lo que sí requiere criterio: leer el archivo completo si el diff no alcanza, buscar contexto en el resto del repo, decidir si un patrón es realmente un problema o solo se ve raro a primera vista.
+
+Dicho así suena a eslogan, así que vale la pena abrir la caja y ver qué hay adentro:
+
+- **Filtro de cinco compuertas.** Antes de gastar un solo token, cada archivo pasa por un filtro determinístico: descarta binarios, respeta tus exclusiones, respeta tus inclusiones explícitas, filtra por extensión no soportada y descarta archivos de test por defecto. Nada de esto lo decide el modelo — es código plano y auditable. Puedes correr `ocr review --preview` y ver exactamente qué va a revisar antes de gastar un solo token.
+- **Agrupación semántica.** Antes de revisar, una sola llamada al LLM mira solo los *metadatos* del diff (rutas, si el archivo fue creado/modificado/borrado, cuántas líneas cambiaron) — nunca el contenido — y agrupa hasta 10 archivos relacionados en un mismo lote (un handler, su servicio y su test, por ejemplo). Cada lote se revisa en una sola conversación para que el agente pueda razonar entre archivos relacionados sin perder contexto.
+- **Profundidad que tú controlas.** El flag `--effort` (low / medium / high) decide cuántas rondas de revisión corre cada lote — 1, 2 o 3 — y cada ronda nueva recibe lo ya confirmado en las anteriores para no repetirse. Si una ronda no encuentra nada nuevo, se detiene sola: la profundidad nunca cuesta más de lo que vale.
+- **Posicionamiento y reflexión.** Un módulo aparte, independiente del razonamiento del agente, calcula en qué línea exacta va cada comentario con una estrategia progresiva de varios niveles. Otro módulo de "reflexión" revisa los comentarios ya generados y descarta los que resultan ser alucinaciones antes de que lleguen a tu terminal.
+- **Compresión de memoria en tres zonas.** En revisiones largas, la conversación con el modelo se parte en zona congelada, zona comprimida y zona activa — así el agente no pierde el hilo ni se queda sin espacio de contexto en diffs grandes.
+- **Multi-modelo de verdad.** Habla Anthropic Messages API, OpenAI Chat Completions y OpenAI Responses API de fábrica, con soporte listo para usar en Anthropic, OpenAI, DashScope, DeepSeek y Z.AI, además de endpoints privados propios.
+
+El resultado, según el benchmark que publicaron — 200 PRs reales de 50 repos open source, en 10 lenguajes, validados a mano por más de 80 ingenieros senior — es mayor precisión que un agente de propósito general con el mismo modelo, usando cerca de una novena parte de los tokens.
+
+Ojo: el recall es más bajo a propósito. No intenta encontrar todo. Intenta que lo que reporta sea real. Es una decisión de producto, no una limitación que se les escapó.
+
+---
+
+## Lo probé en mi propio proyecto
+
+No me quedé con el README. Lo instalé en este mismo portfolio y lo corrí contra los cambios que tenía sin commitear.
+
+Lo interesante no fue que encontrara un bug gigante — no lo hubo. Fue que, siguiendo su propio checklist de seguridad, me hizo caer en cuenta de algo que se me había pasado: una comparación de un secreto con `!==` en una función serverless, que técnicamente funciona pero no es resistente a un timing attack. Lo cambié por `crypto.timingSafeEqual` en el momento.
+
+Es una diferencia de nivel: un checklist que fuerza a mirar cada archivo bajo las mismas reglas de seguridad, cada vez, sin que dependa de si el modelo "se acordó" de preguntarse por eso.
+
+Además corre en **modo delegación**: no necesita su propia API key ni su propio proveedor de LLM. Le entrega la selección de archivos y las reglas ya armadas al agente que ya estés usando — Claude Code, Cursor, Codex — y ese agente hace la revisión con el contexto que ya tiene del proyecto. Cero fricción de adopción, cero llave nueva que pedir.
+
+---
+
+## La pregunta real: ¿por qué liberarlo?
+
+Aquí es donde se pone interesante desde el lado no técnico.
+
+Open Code Review no es un side project de fin de semana. Es una herramienta que, según Alibaba, ya evitó millones de defectos en producción interna. Ese tipo de activo normalmente se protege, no se publica con licencia Apache-2.0.
+
+Algunas hipótesis, ninguna excluyente:
+
+- **Prueba de escala real.** Decir "lo construimos nosotros" no significa nada en un mercado saturado de herramientas de IA. Decir "esto corrió dos años sobre nuestro propio código y lo estamos abriendo" sí es una credencial que no se puede fingir.
+- **Ganar la capa de distribución, no la de modelo.** Si tu herramienta de revisión funciona con cualquier LLM y cualquier agente, no compites por quién tiene el mejor modelo — te vuelves la capa por la que pasa todo el mundo, sin importar qué modelo elijan mañana.
+- **El open-core de siempre.** El CLI es gratis. El visor de sesiones en navegador, la integración con OpenTelemetry, el soporte enterprise — eso ya suena a producto que se monetiza después, una vez que la base de usuarios está instalada.
+- **Reclutamiento y reputación técnica.** Un repo así, con benchmark público y arquitectura documentada, es una vitrina para el equipo que lo construyó. Eso también tiene valor, aunque no aparezca en ningún balance financiero.
+
+No creo que sea una sola razón. Creo que es una apuesta calculada: liberar la herramienta cuesta relativamente poco comparado con lo que gana en distribución, credibilidad y posición en un espacio donde todavía nadie tiene la última palabra.
+
+---
+
+## Mi lectura
+
+Ya escribí antes sobre cómo la IA está dejando de ser un chat abierto en una pestaña para convertirse en infraestructura que corre de fondo. Open Code Review es la misma historia contada desde otro ángulo: no es solo que los agentes necesiten infraestructura para persistir — también necesitan **procesos de ingeniería** alrededor para ser confiables, no solo un prompt más largo y una promesa de que esta vez sí va a funcionar.
+
+Las empresas que están ganando en este espacio no son las que tienen el modelo más grande. Son las que están dispuestas a liberar años de ingeniería interna con tal de convertirse en el estándar de facto antes de que alguien más lo haga.
+
+---
+
+## ¿Y tú qué opinas?
+
+¿Crees que en los próximos meses vamos a ver más empresas abriendo sus herramientas internas de IA para ganar terreno, en vez de venderlas como producto cerrado?
+
+Me encantaría leer tu punto de vista.
+
+---
+
+### Fuentes
+
+- [Open Code Review — Features](https://open-codereview.ai/features). Los seis pilares técnicos (arquitectura híbrida, posicionamiento y reflexión, soporte multi-modelo, revisión progresiva por esfuerzo, compresión de memoria, reglas incorporadas) y sus descripciones oficiales.
+- [alibaba/open-code-review](https://github.com/alibaba/open-code-review) en GitHub. Código fuente, benchmark AACR-Bench, licencia Apache-2.0 y documentación de arquitectura (`pages/src/content/docs/en/architecture.md`).

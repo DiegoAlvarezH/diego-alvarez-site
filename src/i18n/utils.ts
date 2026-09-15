@@ -1,4 +1,5 @@
 import { ui, defaultLang, type Lang, type UIKey } from './ui';
+import { SOCIALS } from '@/data/cv';
 
 export function getLangFromUrl(url: URL): Lang {
   const [, first] = url.pathname.split('/');
@@ -27,4 +28,12 @@ export function switchLangPath(url: URL): { lang: Lang; href: string } {
     path = path.replace(new RegExp(`^/${current}`), '') || '/';
   }
   return { lang: target, href: localePath(target, path) };
+}
+
+/** mailto: con subject/body traducidos — usado en Footer y HomePage. */
+export function buildMailto(t: (key: UIKey) => string): string {
+  const email = SOCIALS.find((s) => s.icon === 'mail')?.value ?? '';
+  const subject = encodeURIComponent(t('contact.subject'));
+  const body = encodeURIComponent(t('contact.body'));
+  return `mailto:${email}?subject=${subject}&body=${body}`;
 }

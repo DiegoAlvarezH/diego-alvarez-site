@@ -6,6 +6,7 @@ import Footer from '@/components/Footer.astro';
 import CursorGlow from '@/components/CursorGlow.astro';
 import ScrollProgress from '@/components/ScrollProgress.astro';
 import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { SOCIALS } from '@/data/cv';
 
 interface Props {
   title?: string;
@@ -51,6 +52,7 @@ const alternates = [
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;600;700;800;900&display=swap"
@@ -63,10 +65,7 @@ const alternates = [
       jobTitle: 'Senior Software & AI Engineer',
       url: 'https://diegoalvarez.tech',
       address: { '@type': 'PostalAddress', addressLocality: 'Medellín', addressCountry: 'CO' },
-      sameAs: [
-        'https://github.com/DiegoAlvarezH',
-        'https://linkedin.com/in/diegoalvarezh',
-      ],
+      sameAs: SOCIALS.filter((s) => s.icon === 'github' || s.icon === 'linkedin').map((s) => s.href),
     })} />
 
     <script is:inline>

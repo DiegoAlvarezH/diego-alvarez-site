@@ -8,7 +8,7 @@ featured: true
 order: 8
 ---
 
-![Android Earthquake Alerts](/images/blog/post-android/eq-mapa-cobertura.png)
+![Android Earthquake Alerts](/images/blog/post-android/eq-mapa-cobertura.webp)
 
 We recently went through a strong earthquake and, like a lot of people around me, my phone said nothing until the ground had already started shaking. After the scare came the obvious question: *isn't Android supposed to have an earthquake alert system? Why didn't it go off?*
 
@@ -36,7 +36,7 @@ What Google did was take the accelerometer already built into every Android phon
 
 It's literally citizen science at a planetary scale: every phone is a sensor, and the real intelligence lies in how the server combines thousands of noisy, imperfect signals into a reliable estimate within seconds.
 
-![Global map of detections and alerts from the Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.png)
+![Global map of detections and alerts from the Android Earthquake Alerts System](/images/blog/post-android/eq-mapa-cobertura.webp)
 
 *The system already detects and delivers alerts in dozens of countries (green), including much of Latin America. Red and yellow mark real earthquakes where strong-shaking and light-shaking alerts were issued, respectively; gray marks detections where no alert was sent. Source: [Google Research, "Android Earthquake Alerts: A global system for early warning"](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
@@ -50,13 +50,13 @@ These are figures Google itself published about the system's real-world performa
 - The first alerts are typically issued between **8 and 18 seconds** after the earthquake starts.
 - Global coverage of early warning systems went from around **250 million people** (with traditional national systems like Japan's, Mexico's, or Taiwan's) to more than **2.5 billion**, largely because Android enabled it by default on billions of phones.
 
-![Growth chart of global reach of earthquake early warning systems](/images/blog/post-android/eq-alcance-global.png)
+![Growth chart of global reach of earthquake early warning systems](/images/blog/post-android/eq-alcance-global.webp)
 
 *Before 2019, access to earthquake early warnings depended on national systems like Japan's (JMA), Mexico's (SAS), or the United States' (ShakeAlert). The green bar shows how Android multiplied by ten the number of people with access to some form of alert. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
 And when Google surveyed more than 1.5 million users who received a real alert, 85% rated it as "very useful." But there's a data point buried in that same survey that's key to understanding the complaints you hear in Colombia: only **36% received the alert before feeling the shaking**; 28% received it *during* the shaking, and 23% received it *after* it had already passed.
 
-![User feedback survey on earthquake alerts](/images/blog/post-android/eq-feedback-usuarios.png)
+![User feedback survey on earthquake alerts](/images/blog/post-android/eq-feedback-usuarios.webp)
 
 *Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
@@ -66,13 +66,13 @@ This was, for me, the finding that best explains the frustration of "my phone di
 
 Google's own data shows this bluntly: in magnitude 6.7 and 5.7 earthquakes analyzed in the Philippines and Nepal, the stronger the shaking felt (closer to the epicenter), **the lower — or even negative — the warning time was**. In other words: exactly where the earthquake hits hardest is where the system has the least margin to warn people before it arrives.
 
-![Warning time charts by shaking intensity in earthquakes in the Philippines and Nepal](/images/blog/post-android/eq-tiempo-aviso.png)
+![Warning time charts by shaking intensity in earthquakes in the Philippines and Nepal](/images/blog/post-android/eq-tiempo-aviso.webp)
 
 *Each dot is a real phone. The higher the shaking intensity (closer to the epicenter), the closer the warning time gets to zero — or even arrives after the shaking already started. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 
 This isn't a defect exclusive to Android's system: it's a physical limitation of any seismic early warning. It also explains why, during the 2023 Turkey-Syria earthquake, the system severely underestimated the magnitude (it calculated between 4.5 and 4.9 when it was actually 7.8), and only about 469 people received the "Take Action" alert when roughly 10 million should have. Google itself acknowledged the failure and used it to improve its algorithms.
 
-![Evolution of the magnitude error of the Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.png)
+![Evolution of the magnitude error of the Android Earthquake Alerts System](/images/blog/post-android/eq-error-magnitud.webp)
 
 *The margin of error in magnitude estimation has steadily decreased since 2021, but it still exists, especially in the first estimate (orange line) for large, nearby earthquakes. Source: [Google Research](https://research.google/blog/android-earthquake-alerts-a-global-system-for-early-warning/).*
 

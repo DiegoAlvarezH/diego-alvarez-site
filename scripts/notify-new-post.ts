@@ -14,6 +14,7 @@ import matter from 'gray-matter';
 const STATE_FILE = '.published-posts.json';
 const SITE_URL = process.env.URL ?? 'https://diegoalvarez.tech';
 const FUNCTION_URL = `${SITE_URL}/.netlify/functions/publish-post`;
+const PUBLISH_SECRET = process.env.PUBLISH_SECRET ?? '';
 
 // dev.to solo acepta tags alfanuméricos en minúscula
 const toDevtoTag = (tag: string) => tag.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -42,7 +43,7 @@ async function main() {
     console.log(`Publicando: ${post.slug}`);
     const res = await fetch(FUNCTION_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Publish-Secret': PUBLISH_SECRET },
       body: JSON.stringify({
         title: post.title,
         description: post.description,
