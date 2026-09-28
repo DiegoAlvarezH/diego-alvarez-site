@@ -11,12 +11,21 @@ import { SOCIALS } from '@/data/cv';
 interface Props {
   title?: string;
   description?: string;
+  /** Ruta o URL de la imagen para og:image / twitter:image. */
+  image?: string | null;
+  type?: 'website' | 'article';
 }
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const { title = t('meta.title'), description = t('meta.description') } = Astro.props;
+const {
+  title = t('meta.title'),
+  description = t('meta.description'),
+  image = null,
+  type = 'website',
+} = Astro.props;
+const ogImage = image ? new URL(image, Astro.site) : null;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
@@ -41,7 +50,9 @@ const alternates = [
     {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

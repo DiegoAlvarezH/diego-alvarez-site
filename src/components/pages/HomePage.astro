@@ -6,13 +6,15 @@ import ServiceCard from '@/components/ServiceCard.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import StatCounter from '@/components/StatCounter.astro';
 import Icon from '@/components/Icon.astro';
+import PostCard from '@/components/PostCard.astro';
 import { getLangFromUrl, useTranslations, localePath, buildMailto } from '@/i18n/utils';
-import { getLocalized } from '@/i18n/content';
+import { getLocalized, stripLang, getCover } from '@/i18n/content';
 import { MARQUEE_ITEMS } from '@/data/cv';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const projects = await getLocalized('projects', lang);
+const latestPosts = (await getLocalized('blog', lang)).slice(-3).reverse();
 
 const stats = [
   { value: 5, suffix: '+', label: t('stats.years') },
@@ -80,7 +82,7 @@ const services = [
             </span>
             <span class="hero-line block text-right" style="--d: 0.5s; font-size: clamp(64px, 10vw, 120px);">
               <span class="text-white">{t('hero.line3')}</span>
-              <span class="text-accent">{t('hero.line3accent')}</span>
+              <span class="text-accent-ink">{t('hero.line3accent')}</span>
             </span>
           </h1>
         </div>
@@ -180,29 +182,66 @@ const services = [
       </div>
     </section>
 
+    <!-- LATEST POSTS -->
+    <section class="bg-bg px-[6%] py-16">
+      <div class="reveal flex items-end justify-between gap-6 flex-wrap">
+        <div>
+          <p class="font-mono uppercase text-text-3 text-[9px] tracking-[5px]">{t('blog.latest.label')}</p>
+          <h2 class="font-sans font-extrabold text-white mt-3" style="font-size: clamp(28px, 4vw, 44px); letter-spacing: -1.5px;">
+            {t('blog.latest.title')}
+          </h2>
+        </div>
+        <a
+          href={localePath(lang, '/blog')}
+          class="group font-mono text-accent-ink text-[11px] tracking-[3px] uppercase flex items-center gap-2 no-underline"
+        >
+          {t('blog.latest.all')}
+          <span class="transition-transform duration-150 group-hover:translate-x-1"><Icon name="arrow-right" size={14} /></span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-8">
+        {
+          latestPosts.map((post, i) => (
+            <div class="reveal h-full" style={`--reveal-delay: ${i * 0.1}s`}>
+              <PostCard
+                href={localePath(lang, `/blog/${stripLang(post.id)}`)}
+                title={post.data.title}
+                excerpt={post.data.description}
+                tag={post.data.tag}
+                date={post.data.date}
+                readTime={post.data.readTime}
+                cover={getCover(post)}
+              />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
     <!-- EXPLORE BLOCK -->
     <section class="bg-bg px-[6%] py-16">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="reveal">
           <a
             href={localePath(lang, '/cv')}
-            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:scale-[1.01] no-underline"
+            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent-ink hover:scale-[1.01] no-underline"
           >
-            <p class="text-accent text-3xl font-mono">↓</p>
+            <p class="text-accent-ink text-3xl font-mono">↓</p>
             <p class="font-mono text-white mt-4 text-[18px] tracking-[3px]">/CV</p>
             <p class="text-text-2 mt-2 text-[13px]">{t('explore.cv.desc')}</p>
-            <p class="text-accent mt-4 font-mono text-sm">{t('explore.cv.cta')}</p>
+            <p class="text-accent-ink mt-4 font-mono text-sm">{t('explore.cv.cta')}</p>
           </a>
         </div>
         <div class="reveal" style="--reveal-delay: 0.1s">
           <a
             href={localePath(lang, '/blog')}
-            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:scale-[1.01] no-underline"
+            class="block cursor-pointer p-8 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent-ink hover:scale-[1.01] no-underline"
           >
-            <p class="text-accent text-3xl font-mono">✦</p>
+            <p class="text-accent-ink text-3xl font-mono">✦</p>
             <p class="font-mono text-white mt-4 text-[18px] tracking-[3px]">/BLOG</p>
             <p class="text-text-2 mt-2 text-[13px]">{t('explore.blog.desc')}</p>
-            <p class="text-accent mt-4 font-mono text-sm">{t('explore.blog.cta')}</p>
+            <p class="text-accent-ink mt-4 font-mono text-sm">{t('explore.blog.cta')}</p>
           </a>
         </div>
       </div>
@@ -221,9 +260,9 @@ const services = [
           >
           </div>
           <div class="relative z-10">
-            <p class="font-mono text-accent uppercase text-[10px] tracking-[5px]">{t('cta.label')}</p>
+            <p class="font-mono text-accent-ink uppercase text-[10px] tracking-[5px]">{t('cta.label')}</p>
             <h2 class="font-sans font-extrabold text-white mt-4" style="font-size: clamp(32px, 5vw, 56px); letter-spacing: -2px;">
-              {t('cta.title.pre')} <span class="text-accent">{t('cta.title.accent')}</span>
+              {t('cta.title.pre')} <span class="text-accent-ink">{t('cta.title.accent')}</span>
             </h2>
             <p class="text-text-2 mt-4 max-w-[500px] mx-auto text-[15px]">{t('cta.desc')}</p>
             <a

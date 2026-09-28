@@ -18,3 +18,9 @@ export async function getLocalized<C extends keyof DataEntryMap>(
 export function stripLang(id: string): string {
   return id.replace(/^(es|en)\//, '');
 }
+
+/** Portada de un post: la primera imagen de /images/ en el cuerpo MDX (o null). */
+export function getCover(post: CollectionEntry<'blog'>): string | null {
+  const match = post.body?.match(/!\[[^\]]*\]\((\/images\/[^)\s]+)\)/);
+  return match ? match[1] : null;
+}

@@ -14,6 +14,8 @@
   --c-text-3: #444444;
   --c-prose: #b5b5b5;
   --c-prose-em: #d5d5d5;
+  /* Acento como texto/borde: lima en dark, verde oscuro legible sobre fondos claros */
+  --c-accent-ink: #a8ff47;
 }
 
 :root[data-theme='light'] {
@@ -27,6 +29,7 @@
   --c-text-3: #9a9a9a;
   --c-prose: #3c3c3c;
   --c-prose-em: #2a2a2a;
+  --c-accent-ink: #4d7c0f;
 }
 
 /* El hero corre sobre video oscuro: fuerza tokens dark sin importar el tema */
@@ -34,6 +37,7 @@
   --c-text-1: #ffffff;
   --c-text-2: #888888;
   --c-text-3: #444444;
+  --c-accent-ink: #a8ff47;
 }
 
 @layer base {
@@ -79,7 +83,7 @@
   }
 
   :focus-visible {
-    outline: 1px solid #a8ff47;
+    outline: 1px solid var(--c-accent-ink);
     outline-offset: 2px;
   }
 }
