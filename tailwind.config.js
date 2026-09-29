@@ -12,6 +12,8 @@ export default {
         'border-hover': 'var(--c-border-hover)',
         accent: '#A8FF47',
         'accent-dark': '#7ACC1F',
+        // Acento para texto/bordes — adaptable al tema (ver --c-accent-ink en global.css)
+        'accent-ink': 'var(--c-accent-ink)',
         'text-1': 'var(--c-text-1)',
         'text-2': 'var(--c-text-2)',
         'text-3': 'var(--c-text-3)',

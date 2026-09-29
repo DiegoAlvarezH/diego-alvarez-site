@@ -22,7 +22,7 @@ const isActive = (to: string) => (to.replace(/\/$/, '') || '/') === path;
 >
   <a
     href={localePath(lang, '/')}
-    class="font-mono text-xs font-semibold tracking-widest text-white uppercase select-none hover:text-accent transition-colors duration-200"
+    class="font-mono text-xs font-semibold tracking-widest text-white uppercase select-none hover:text-accent-ink transition-colors duration-200"
   >
     D · ALVAREZ
   </a>
@@ -55,7 +55,7 @@ const isActive = (to: string) => (to.replace(/\/$/, '') || '/') === path;
       id="theme-toggle"
       aria-label={t('nav.theme')}
       title={t('nav.theme')}
-      class="flex items-center justify-center text-text-2 border border-border p-2.5 rounded-[2px] hover:border-accent hover:text-accent transition-colors duration-200"
+      class="flex items-center justify-center text-text-2 border border-border p-2.5 rounded-[2px] hover:border-accent-ink hover:text-accent-ink transition-colors duration-200"
     >
       <!-- muestra el ícono del tema opuesto al activo -->
       <span class="theme-icon-sun"><Icon name="sun" size={13} /></span>
@@ -67,13 +67,13 @@ const isActive = (to: string) => (to.replace(/\/$/, '') || '/') === path;
       href={other.href}
       aria-label={t('nav.lang')}
       title={t('nav.lang')}
-      class="flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[2px] uppercase text-text-2 border border-border px-3 py-2.5 rounded-[2px] hover:border-accent hover:text-accent transition-colors duration-200"
+      class="flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[2px] uppercase text-text-2 border border-border px-3 py-2.5 rounded-[2px] hover:border-accent-ink hover:text-accent-ink transition-colors duration-200"
     >
       <Icon name="globe" size={13} />
       <span>
-        <span class:list={[lang === 'es' ? 'text-accent' : '']}>ES</span>
+        <span class:list={[lang === 'es' ? 'text-accent-ink' : '']}>ES</span>
         <span class="text-text-3 mx-0.5">/</span>
-        <span class:list={[lang === 'en' ? 'text-accent' : '']}>EN</span>
+        <span class:list={[lang === 'en' ? 'text-accent-ink' : '']}>EN</span>
       </span>
     </a>
 
@@ -108,7 +108,7 @@ const isActive = (to: string) => (to.replace(/\/$/, '') || '/') === path;
           href={link.to}
           class:list={[
             'font-mono text-sm tracking-[3px] uppercase transition-colors',
-            isActive(link.to) ? 'text-accent' : 'text-text-2',
+            isActive(link.to) ? 'text-accent-ink' : 'text-text-2',
           ]}
         >
           {link.label}

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-label="A2A conecta agentes entre si (horizontal); MCP conecta cada agente con sus herramientas (vertical)">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#A8FF47"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="640" fill="#050505"/>
+
+  <g font-family="JetBrains Mono, monospace">
+    <!-- lane labels -->
+    <text x="40" y="52" font-size="13" letter-spacing="4" fill="#A8FF47">A2A · AGENT ↔ AGENT</text>
+    <text x="40" y="614" font-size="13" letter-spacing="4" fill="#8a8a8a">MCP · AGENT → TOOLS / DATA</text>
+
+    <!-- agents -->
+    <g font-size="15" text-anchor="middle">
+      <rect x="70" y="170" width="260" height="130" rx="8" fill="#0b1206" stroke="#A8FF47" stroke-width="1.5"/>
+      <text x="200" y="215" fill="#ffffff" font-size="17" font-weight="600">Client Agent</text>
+      <text x="200" y="245" fill="#8a8a8a" font-size="12">A2A client</text>
+      <text x="200" y="272" fill="#A8FF47" font-size="12">discover · delegate</text>
+
+      <rect x="470" y="170" width="260" height="130" rx="8" fill="#0b1206" stroke="#A8FF47" stroke-width="1.5"/>
+      <text x="600" y="215" fill="#ffffff" font-size="17" font-weight="600">Remote Agent A</text>
+      <text x="600" y="245" fill="#8a8a8a" font-size="12">A2A server</text>
+      <text x="600" y="272" fill="#A8FF47" font-size="12">Agent Card · Tasks</text>
+
+      <rect x="870" y="170" width="260" height="130" rx="8" fill="#0b1206" stroke="#A8FF47" stroke-width="1.5"/>
+      <text x="1000" y="215" fill="#ffffff" font-size="17" font-weight="600">Remote Agent B</text>
+      <text x="1000" y="245" fill="#8a8a8a" font-size="12">A2A server</text>
+      <text x="1000" y="272" fill="#A8FF47" font-size="12">Agent Card · Tasks</text>
+    </g>
+
+    <!-- A2A horizontal links -->
+    <g stroke="#A8FF47" stroke-width="2" fill="none">
+      <path d="M335 215H465" marker-end="url(#arr)"/>
+      <path d="M465 255H335" marker-end="url(#arr)" stroke-dasharray="5 5"/>
+      <path d="M200 165 C 200 90, 1000 90, 1000 165" marker-end="url(#arr)"/>
+    </g>
+    <g font-size="11" fill="#A8FF47" text-anchor="middle">
+      <text x="400" y="205">task</text>
+      <text x="400" y="275">SSE · artifact</text>
+      <text x="600" y="100">JSON-RPC 2.0 over HTTPS</text>
+    </g>
+
+    <!-- tools -->
+    <g font-size="12" text-anchor="middle" fill="#bdbdbd">
+      <rect x="95" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="145" y="473">API</text>
+      <rect x="205" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="255" y="473">DB</text>
+
+      <rect x="495" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="545" y="473">Files</text>
+      <rect x="605" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="655" y="473">CRM</text>
+
+      <rect x="895" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="945" y="473">Browser</text>
+      <rect x="1005" y="440" width="100" height="56" rx="6" fill="#0d0d0d" stroke="#2a2a2a"/>
+      <text x="1055" y="473">ERP</text>
+    </g>
+
+    <!-- MCP vertical links -->
+    <g stroke="#8a8a8a" stroke-width="1.5" fill="none" marker-end="url(#arrg)">
+      <path d="M170 305V434"/><path d="M230 305V434"/>
+      <path d="M570 305V434"/><path d="M630 305V434"/>
+      <path d="M970 305V434"/><path d="M1030 305V434"/>
+    </g>
+    <g font-size="11" fill="#8a8a8a">
+      <text x="238" y="375">MCP</text>
+      <text x="638" y="375">MCP</text>
+      <text x="1038" y="375">MCP</text>
+    </g>
+  </g>
+</svg>

@@ -20,13 +20,13 @@ const hasLinks = Boolean(githubUrl || demoUrl);
 
 <div
   class:list={[
-    'group relative flex flex-col p-6 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent hover:-translate-y-1',
+    'group relative flex flex-col p-6 bg-surface border border-border rounded-[4px] transition-all duration-200 hover:border-accent-ink hover:-translate-y-1',
     deprecated && 'opacity-60 hover:opacity-100',
   ]}
 >
   <div class="flex items-center gap-2 self-start">
     <span
-      class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]"
+      class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent-ink border border-accent-ink rounded-[2px]"
     >
       {tag}
     </span>
@@ -60,7 +60,7 @@ const hasLinks = Boolean(githubUrl || demoUrl);
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="font-mono text-[10px] tracking-[2px] uppercase text-text-2 px-3 py-1.5 inline-flex items-center gap-1.5 border border-border rounded-[2px] transition-colors duration-150 hover:text-accent hover:border-accent"
+            class="font-mono text-[10px] tracking-[2px] uppercase text-text-2 px-3 py-1.5 inline-flex items-center gap-1.5 border border-border rounded-[2px] transition-colors duration-150 hover:text-accent-ink hover:border-accent-ink"
           >
             <Icon name="github" size={13} />
             {t('projects.github')}
@@ -83,7 +83,7 @@ const hasLinks = Boolean(githubUrl || demoUrl);
 
   {
     !hasLinks && (
-      <span class="absolute bottom-5 right-5 text-accent text-base font-mono opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0">
+      <span class="absolute bottom-5 right-5 text-accent-ink text-base font-mono opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0">
         →
       </span>
     )

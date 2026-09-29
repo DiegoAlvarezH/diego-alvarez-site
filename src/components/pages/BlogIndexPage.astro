@@ -3,7 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import BlogRow from '@/components/BlogRow.astro';
 import Icon from '@/components/Icon.astro';
 import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
-import { getLocalized, stripLang } from '@/i18n/content';
+import { getLocalized, stripLang, getCover } from '@/i18n/content';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -13,6 +13,14 @@ const featured = posts[posts.length - 1];
 const rest = posts.slice(0, -1).reverse();
 
 const postHref = (id: string) => localePath(lang, `/blog/${stripLang(id)}`);
+const featuredCover = featured ? getCover(featured) : null;
+
+// Chips de filtro: tags ordenados por cantidad de posts
+const tagCounts = posts.reduce<Record<string, number>>((acc, p) => {
+  acc[p.data.tag] = (acc[p.data.tag] ?? 0) + 1;
+  return acc;
+}, {});
+const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 const title = `Blog — Diego Alvarez`;
 ---
 
@@ -22,7 +30,7 @@ const title = `Blog — Diego Alvarez`;
       <!-- Back link -->
       <a
         href={localePath(lang, '/')}
-        class="group font-mono text-accent text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
+        class="group font-mono text-accent-ink text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
       >
         <span class="transition-transform duration-150 group-hover:-translate-x-1">←</span>
         {t('cv.back')}
@@ -30,7 +38,7 @@ const title = `Blog — Diego Alvarez`;
 
       <!-- Header -->
       <div class="reveal">
-        <p class="font-mono text-accent uppercase text-[9px] tracking-[5px]">{t('blog.label')}</p>
+        <p class="font-mono text-accent-ink uppercase text-[9px] tracking-[5px]">{t('blog.label')}</p>
         <h1 class="font-sans font-extrabold text-white mt-3" style="font-size: clamp(36px, 6vw, 52px); letter-spacing: -2px;">
           {t('blog.title')}
         </h1>
@@ -40,19 +48,31 @@ const title = `Blog — Diego Alvarez`;
       <!-- Featured post -->
       {
         featured && (
-          <div class="reveal" style="--reveal-delay: 0.1s">
+          <div class="reveal" style="--reveal-delay: 0.1s" data-post-tag={featured.data.tag}>
             <a
               href={postHref(featured.id)}
-              class="group mt-10 block relative overflow-hidden cursor-pointer p-8 md:p-10 border border-border rounded-[4px] transition-colors duration-200 hover:border-accent no-underline"
+              class:list={[
+                'group mt-10 relative overflow-hidden cursor-pointer border border-border rounded-[4px] transition-colors duration-200 hover:border-accent-ink no-underline',
+                featuredCover ? 'grid md:grid-cols-[1.1fr_1fr]' : 'block',
+              ]}
               style="background: linear-gradient(135deg, var(--c-surface) 0%, var(--c-surface-2) 100%);"
             >
+              {featuredCover && (
+                <div class="relative overflow-hidden aspect-[16/9] md:aspect-auto md:order-2 border-b md:border-b-0 md:border-l border-border">
+                  <img
+                    src={featuredCover}
+                    alt=""
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                </div>
+              )}
               <div
                 class="absolute inset-0 opacity-20"
                 style="background: radial-gradient(circle at 80% 20%, rgba(168,255,71,0.15) 0%, transparent 50%);"
               />
-              <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]">
+              <div class="relative z-10 p-8 md:p-10 flex flex-col justify-center">
+                <div class="flex items-center gap-3 mb-4 flex-wrap">
+                  <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent-ink border border-accent-ink rounded-[2px]">
                     {featured.data.tag}
                   </span>
                   <span class="font-mono text-text-3 flex items-center gap-1 text-[10px]">
@@ -67,7 +87,7 @@ const title = `Blog — Diego Alvarez`;
                 <p class="text-text-2 mt-3 text-[14px] leading-relaxed">{featured.data.description}</p>
                 <div class="flex items-center justify-between mt-6">
                   <span class="font-mono text-text-3 text-[10px]">{featured.data.date}</span>
-                  <span class="text-accent font-mono text-sm flex items-center gap-1 transition-transform duration-150 group-hover:translate-x-1">
+                  <span class="text-accent-ink font-mono text-sm flex items-center gap-1 transition-transform duration-150 group-hover:translate-x-1">
                     {t('blog.read')}
                     <Icon name="arrow-right" size={14} />
                   </span>
@@ -78,12 +98,37 @@ const title = `Blog — Diego Alvarez`;
         )
       }
 
+      <!-- Tag filter -->
+      <div class="reveal mt-12 flex flex-wrap gap-2" role="group" aria-label={t('blog.filter')} style="--reveal-delay: 0.15s">
+        <button
+          type="button"
+          data-filter="all"
+          aria-pressed="true"
+          class="blog-chip font-mono text-[9px] tracking-[3px] uppercase px-3 py-1.5 border rounded-full transition-colors duration-150"
+        >
+          {t('blog.all')} <span class="opacity-60">{posts.length}</span>
+        </button>
+        {
+          tags.map(([tag, count]) => (
+            <button
+              type="button"
+              data-filter={tag}
+              aria-pressed="false"
+              class="blog-chip font-mono text-[9px] tracking-[3px] uppercase px-3 py-1.5 border rounded-full transition-colors duration-150"
+            >
+              {tag} <span class="opacity-60">{count}</span>
+            </button>
+          ))
+        }
+      </div>
+
       <!-- Post list -->
-      <div class="mt-10 border-t border-border">
+      <div class="mt-6 border-t border-border">
         {
           rest.map((post, i) => (
-            <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`}>
+            <div class="reveal" style={`--reveal-delay: ${i * 0.08}s`} data-post-tag={post.data.tag}>
               <BlogRow
+                cover={getCover(post)}
                 href={postHref(post.id)}
                 date={post.data.date}
                 title={post.data.title}
@@ -102,7 +147,7 @@ const title = `Blog — Diego Alvarez`;
           <p class="font-mono text-text-3 text-[11px] tracking-[2px]">{t('blog.empty')}</p>
           <a
             href={localePath(lang, '/cv')}
-            class="font-mono text-accent mt-4 inline-flex items-center gap-2 text-[11px] tracking-[2px] hover:scale-[1.02] transition-transform duration-150 no-underline"
+            class="font-mono text-accent-ink mt-4 inline-flex items-center gap-2 text-[11px] tracking-[2px] hover:scale-[1.02] transition-transform duration-150 no-underline"
           >
             <span class="uppercase">{t('blog.follow')}</span>
             <Icon name="arrow-right" size={14} />
@@ -112,3 +157,40 @@ const title = `Blog — Diego Alvarez`;
     </div>
   </main>
 </BaseLayout>
+
+<style>
+  .blog-chip {
+    color: var(--c-text-2);
+    border-color: var(--c-border);
+  }
+  .blog-chip:hover {
+    color: var(--c-text-1);
+    border-color: var(--c-border-hover);
+  }
+  .blog-chip[aria-pressed='true'] {
+    color: #000;
+    background: #a8ff47;
+    border-color: #a8ff47;
+  }
+</style>
+
+<script>
+  function initBlogFilter() {
+    const chips = document.querySelectorAll<HTMLButtonElement>('.blog-chip:not([data-bound])');
+    const items = document.querySelectorAll<HTMLElement>('[data-post-tag]');
+    chips.forEach((chip) => {
+      chip.dataset.bound = '1';
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter;
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        items.forEach((el) => {
+          const show = filter === 'all' || el.dataset.postTag === filter;
+          el.classList.toggle('hidden', !show);
+          if (show) el.classList.add('is-visible');
+        });
+      });
+    });
+  }
+  initBlogFilter();
+  document.addEventListener('astro:page-load', initBlogFilter);
+</script>

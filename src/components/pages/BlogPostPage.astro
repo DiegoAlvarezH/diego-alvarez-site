@@ -4,24 +4,41 @@ import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Icon from '@/components/Icon.astro';
 import { getLangFromUrl, useTranslations, localePath } from '@/i18n/utils';
+import { getLocalized, stripLang, getCover } from '@/i18n/content';
 
 interface Props {
   post: CollectionEntry<'blog'>;
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+
+// TOC: solo h2 — los h3 del cierre ("Fuentes") no aportan navegación
+const toc = headings.filter((h) => h.depth === 2);
+
+// Anterior = más antiguo, siguiente = más reciente (por `order`)
+const posts = await getLocalized('blog', lang);
+const idx = posts.findIndex((p) => p.id === post.id);
+const prev = idx > 0 ? posts[idx - 1] : null;
+const next = idx < posts.length - 1 ? posts[idx + 1] : null;
+const postHref = (id: string) => localePath(lang, `/blog/${stripLang(id)}`);
 ---
 
-<BaseLayout title={`${post.data.title} — Diego Alvarez`} description={post.data.description}>
+<BaseLayout
+  title={`${post.data.title} — Diego Alvarez`}
+  description={post.data.description}
+  image={getCover(post)}
+  type="article"
+>
   <main class="bg-bg min-h-screen">
-    <article class="max-w-[720px] mx-auto px-6 pt-32 pb-24">
+    <div class="max-w-[1080px] mx-auto px-6 pt-32 pb-24 xl:grid xl:grid-cols-[minmax(0,720px)_220px] xl:justify-center xl:gap-16">
+    <article class="max-w-[720px] mx-auto xl:mx-0 w-full">
       <a
         href={localePath(lang, '/blog')}
-        class="group font-mono text-accent text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
+        class="group font-mono text-accent-ink text-[11px] tracking-[2px] uppercase flex items-center gap-2 mb-12 no-underline w-fit"
       >
         <span class="transition-transform duration-150 group-hover:-translate-x-1">←</span>
         {t('blog.backToBlog')}
@@ -29,7 +46,7 @@ const t = useTranslations(lang);
 
       <header class="reveal">
         <div class="flex items-center gap-3 mb-4 flex-wrap">
-          <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent border border-accent rounded-[2px]">
+          <span class="font-mono text-[8px] tracking-[3px] uppercase px-2 py-1 text-accent-ink border border-accent-ink rounded-[2px]">
             {post.data.tag}
           </span>
           <span class="font-mono text-text-3 flex items-center gap-1 text-[10px]">
@@ -49,7 +66,64 @@ const t = useTranslations(lang);
       <div class="prose-dark">
         <Content />
       </div>
+
+      {
+        (prev || next) && (
+          <nav class="mt-16 pt-10 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="Posts">
+            {prev ? (
+              <a
+                href={postHref(prev.id)}
+                class="group block p-5 border border-border rounded-[4px] bg-surface transition-colors duration-200 hover:border-accent-ink no-underline"
+              >
+                <span class="font-mono text-[9px] tracking-[3px] uppercase text-text-3 flex items-center gap-2">
+                  <span class="text-accent-ink transition-transform duration-150 group-hover:-translate-x-1">←</span>
+                  {t('blog.prev')}
+                </span>
+                <span class="block text-white text-[14px] font-semibold leading-snug mt-2">{prev.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <a
+                href={postHref(next.id)}
+                class="group block p-5 border border-border rounded-[4px] bg-surface transition-colors duration-200 hover:border-accent-ink no-underline sm:text-right"
+              >
+                <span class="font-mono text-[9px] tracking-[3px] uppercase text-text-3 flex items-center gap-2 sm:justify-end">
+                  {t('blog.next')}
+                  <span class="text-accent-ink transition-transform duration-150 group-hover:translate-x-1">→</span>
+                </span>
+                <span class="block text-white text-[14px] font-semibold leading-snug mt-2">{next.data.title}</span>
+              </a>
+            )}
+          </nav>
+        )
+      }
     </article>
+
+    {
+      toc.length > 2 && (
+        <aside class="hidden xl:block">
+          <nav class="sticky top-28" aria-label={t('blog.toc')}>
+            <p class="font-mono text-accent-ink uppercase text-[9px] tracking-[4px] mb-4">{t('blog.toc')}</p>
+            <ul class="toc-list border-l border-border">
+              {toc.map((h) => (
+                <li>
+                  <a
+                    href={`#${h.slug}`}
+                    data-toc-link={h.slug}
+                    class="block -ml-px pl-4 py-1.5 border-l border-transparent text-[12px] leading-snug text-text-2 hover:text-text-1 transition-colors duration-150 no-underline"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )
+    }
+    </div>
   </main>
 </BaseLayout>
 
@@ -77,7 +151,7 @@ const t = useTranslations(lang);
     margin: 1rem 0;
   }
   .prose-dark a {
-    color: #a8ff47;
+    color: var(--c-accent-ink);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -102,7 +176,7 @@ const t = useTranslations(lang);
     margin: 0.4rem 0;
   }
   .prose-dark li::marker {
-    color: #a8ff47;
+    color: var(--c-accent-ink);
   }
   .prose-dark code {
     font-family: 'JetBrains Mono', monospace;
@@ -111,7 +185,7 @@ const t = useTranslations(lang);
     border: 1px solid var(--c-border);
     border-radius: 3px;
     padding: 2px 6px;
-    color: #a8ff47;
+    color: var(--c-accent-ink);
   }
   .prose-dark pre {
     background: var(--c-surface) !important;
@@ -129,7 +203,7 @@ const t = useTranslations(lang);
     font-size: 13px;
   }
   .prose-dark blockquote {
-    border-left: 2px solid #a8ff47;
+    border-left: 2px solid var(--c-accent-ink);
     padding-left: 1.25rem;
     margin: 1.5rem 0;
     color: var(--c-text-2);
@@ -138,6 +212,41 @@ const t = useTranslations(lang);
   .prose-dark hr {
     border-color: var(--c-border);
     margin: 2.5rem 0;
+  }
+  .prose-dark h2,
+  .prose-dark h3 {
+    scroll-margin-top: 96px;
+  }
+  .prose-dark table {
+    width: 100%;
+    margin: 1.75rem 0;
+    border-collapse: collapse;
+    font-size: 14px;
+    line-height: 1.5;
+    display: block;
+    overflow-x: auto;
+  }
+  .prose-dark th,
+  .prose-dark td {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--c-border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .prose-dark thead th {
+    background: var(--c-surface-2);
+    color: var(--c-text-1);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .prose-dark tbody tr:nth-child(even) td {
+    background: var(--c-surface);
+  }
+  .toc-list a.is-active {
+    color: var(--c-text-1);
+    border-left-color: var(--c-accent-ink);
   }
   .prose-dark img {
     display: block;
@@ -148,3 +257,42 @@ const t = useTranslations(lang);
     margin: 1.5rem 0 2.5rem;
   }
 </style>
+
+<script>
+  // Resalta en el TOC la última sección cuyo título ya pasó bajo el nav
+  let tocHeadings: HTMLElement[] = [];
+  let tocLinks: NodeListOf<HTMLAnchorElement> | null = null;
+  let tocTicking = false;
+
+  function updateToc() {
+    tocTicking = false;
+    if (!tocLinks?.length) return;
+    let current = tocHeadings[0]?.id;
+    for (const h of tocHeadings) {
+      if (h.getBoundingClientRect().top <= 140) current = h.id;
+      else break;
+    }
+    tocLinks.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === current));
+  }
+
+  function initToc() {
+    tocLinks = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
+    tocHeadings = [...tocLinks]
+      .map((l) => document.getElementById(l.dataset.tocLink!))
+      .filter((el): el is HTMLElement => el !== null);
+    updateToc();
+  }
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!tocTicking) {
+        tocTicking = true;
+        requestAnimationFrame(updateToc);
+      }
+    },
+    { passive: true }
+  );
+  initToc();
+  document.addEventListener('astro:page-load', initToc);
+</script>

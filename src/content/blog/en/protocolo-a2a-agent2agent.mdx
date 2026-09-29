@@ -1,0 +1,215 @@
+---
+title: 'What Is the A2A (Agent2Agent) Protocol? The Standard That Gets AI Agents Talking'
+description: 'MCP solved how an agent uses tools. A2A tackles the next problem: how one agent delegates work to another agent, from another vendor, without custom integrations. What it is, how it works, and why it deserves your attention now.'
+date: 'Sep 2026'
+tag: 'AI AGENTS'
+readTime: '9 min'
+featured: true
+order: 10
+---
+
+![A2A protocol: networked AI agents](/images/blog/a2a-protocol.webp)
+
+A year ago the question was which model to use.
+
+Then it became which tools to plug into the model.
+
+Now there's a new question, and I think it's the one that will define how we build software with AI over the next few years:
+
+> **How does an agent work with another agent you didn't build?**
+
+That's exactly the question **A2A (Agent2Agent)** answers.
+
+---
+
+## The problem: brilliant agents, but isolated
+
+Almost every company taking AI seriously already runs more than one agent. One handles customers, another reviews invoices, another builds reports, another tests software.
+
+Each can be great at its job. The trouble starts when they need to collaborate:
+
+- The support agent needs the billing agent to review a charge.
+- The billing agent was built with a different framework, by a different team, maybe by a different vendor.
+- There's no common language. So someone writes a custom integration. Then another. And another.
+
+It's the same story we lived through with monoliths before microservices: everything works while it's small, and it becomes unmanageable the moment it grows.
+
+Without a standard, every pair of agents that needs to talk is a brand-new integration project.
+
+---
+
+## What A2A is, in one sentence
+
+**A2A is an open protocol that lets AI agents from different vendors and frameworks discover each other, communicate, and coordinate tasks**, without exposing their internal logic and without point-to-point integrations.
+
+A few facts to place it:
+
+- **Google introduced it in April 2025**, alongside a broad group of technology partners.
+- **Since June 23, 2025, it has been hosted by the Linux Foundation** as an open-source project. This matters more than it seems: it stops being "Google's protocol" and becomes a standard with neutral governance.
+- It's built on technology we already know: **HTTPS, JSON-RPC 2.0, and Server-Sent Events (SSE)**. No new stack to learn.
+
+---
+
+## A2A vs. MCP: they don't compete, they complement
+
+This is the most common confusion, so it's worth clearing up early.
+
+**MCP (Model Context Protocol)**, published by Anthropic in 2024, standardizes how an agent connects to **tools and data**: APIs, databases, file systems, a browser.
+
+**A2A** standardizes how an agent connects to **another agent**.
+
+The clearest way to see it is with two axes:
+
+![A2A is horizontal (agent to agent); MCP is vertical (agent to tools)](/images/blog/a2a-vs-mcp.svg)
+
+| | **MCP** | **A2A** |
+|---|---|---|
+| **Connects** | An agent to tools and data | An agent to other agents |
+| **Direction** | Vertical | Horizontal |
+| **The counterpart is** | A tool that runs what it's told | An autonomous agent that reasons and decides how to solve it |
+| **Question it answers** | "What can I use?" | "Who do I delegate this to?" |
+| **Origin** | Anthropic, 2024 | Google, 2025 → Linux Foundation |
+
+In practice, a serious system uses both: **MCP gives each agent its capabilities; A2A orchestrates the collaboration between them.**
+
+---
+
+## How it works under the hood
+
+A2A follows a client-server model that's easy to reason about. There are seven pieces:
+
+- **A2A Client:** the agent (or application) that needs something done.
+- **A2A Server:** the remote agent that receives and processes the task.
+- **Agent Card:** a JSON file where the agent introduces itself — what it can do, how to authenticate, which formats it accepts. It's its business card.
+- **Task:** the unit of work. It has a unique ID and a lifecycle with defined states.
+- **Message:** each turn of the conversation between client and server.
+- **Part:** the content inside a message or artifact — text (`TextPart`), files (`FilePart`), or structured data (`DataPart`).
+- **Artifact:** the concrete deliverable the task produces — a document, an image, a spreadsheet.
+
+Here's a simplified Agent Card:
+
+```json
+{
+  "name": "invoice-review-agent",
+  "description": "Reviews invoices and flags duplicate or out-of-policy charges.",
+  "url": "https://agents.example.com/invoices",
+  "version": "1.2.0",
+  "capabilities": { "streaming": true, "pushNotifications": true },
+  "securitySchemes": { "oauth2": { "type": "oauth2" } },
+  "defaultInputModes": ["text", "application/pdf"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "detect-duplicates",
+      "name": "Detect duplicate charges",
+      "description": "Compares an invoice against the customer's history."
+    }
+  ]
+}
+```
+
+And the full flow happens in three phases:
+
+1. **Discovery.** The client agent finds and reads the available Agent Cards to pick the right collaborator.
+2. **Authentication.** It authenticates with the schemes the Agent Card declares — the same ones as OpenAPI: API keys, OAuth 2.0, OpenID Connect.
+3. **Communication.** It sends the task over HTTPS with JSON-RPC 2.0. If the task is long-running, it gets streaming updates over SSE or push notifications via webhook.
+
+The task lifecycle makes it clear A2A is designed for real work, not instant answers:
+
+```text
+submitted → working → input-required → working → completed
+                                    ↘ failed
+```
+
+That `input-required` state is key: the remote agent can stop halfway and ask for more information, like a colleague would. It's not an endpoint that answers and forgets.
+
+---
+
+## The design principles that make it interesting
+
+What I like most about A2A isn't any single feature. It's a set of design decisions:
+
+- **Agents are opaque.** An agent collaborates without revealing its prompt, internal memory, or tools. It only exposes what it declares in its Agent Card. For a company, that's what makes collaborating with third-party agents possible without handing over its competitive edge.
+- **Existing standards, not inventions.** HTTP, JSON-RPC, and SSE are already in every stack, every gateway, every observability tool.
+- **Enterprise-grade security by design.** Authentication and authorization aren't bolted on later: the Agent Card declares how to authenticate before any conversation starts.
+- **Built for long-running tasks.** Streaming, push notifications, and intermediate states. An agent may take minutes or hours, and the protocol assumes it.
+- **Modality-agnostic.** Text, files, structured data — and the roadmap includes negotiating audio and video inside the conversation.
+
+---
+
+## Where it makes sense
+
+A2A shines when a problem needs **several coordinated specialists**, not one generalist doing everything:
+
+- **Insurance claims.** One agent analyzes documents, another detects fraud, another keeps the customer updated.
+- **Supply chain.** Inventory, logistics, and pricing agents react in real time to shifts in demand.
+- **Customer service.** Marketing, sales, and support collaborate on the same case without the customer repeating their story.
+- **Assisted medical diagnosis.** Radiology, pathology, and symptom specialists combine their judgment on a single case.
+
+It's the same pattern that made microservices the standard: instead of a monolith that knows everything, an ecosystem of specialized pieces working toward a shared goal.
+
+---
+
+## I held it up against my own pipeline
+
+I work on a pipeline of QA automation agents: one plans the test cases, another explores the application, another generates the scripts, and another runs them and repairs them when they fail.
+
+Today those agents talk over REST endpoints we designed ourselves. It works, but every contract is homegrown: anyone who wants to integrate has to read our docs, understand our schemas, and adapt to our way of reporting progress.
+
+Reading the A2A spec, the parallel is direct:
+
+- Each agent would publish its **Agent Card** instead of a Swagger you read by hand.
+- Progress on a long run would be **standard SSE streaming**, not a format we invented.
+- The moment an agent needs a human decision already has a name in the protocol: **`input-required`**.
+- And the most interesting part: an agent from another team, or another vendor, could delegate a task to the executor **without anyone writing an integration**.
+
+It's not that what we have is wrong. It's that A2A turns into a standard exactly the decisions every team is making on its own today.
+
+---
+
+## The challenges you shouldn't ignore
+
+It would be dishonest to sell it as a free lunch:
+
+- **Standards uncertainty.** There are competing specifications, and the protocol version keeps evolving. Betting on it today carries some risk.
+- **More operational complexity.** Several agents collaborating are harder to debug, monitor, and cost out than a single one.
+- **Security and governance.** Agent-to-agent communication means new attack surfaces: agents impersonating others, malicious Agent Cards, injected instructions traveling from one agent to the next.
+- **Higher upfront effort.** For a simple case, a single agent with good tools is still cheaper.
+
+That's why integration and orchestration platforms are still needed: A2A and MCP are the backbone, but someone has to enable, monitor, audit, and govern those interactions.
+
+---
+
+## Why pay attention now
+
+Protocols are decided early.
+
+HTTP didn't win by being perfect: it won because it arrived at the right moment and everyone adopted it. We're seeing the same thing with MCP at the tools layer — in a short time it went from a proposal to what everyone expects an agent to support.
+
+A2A is at that same point for the agent collaboration layer. With Linux Foundation governance, built on standards that already exist, and a roadmap that includes formal authorization in Agent Cards and dynamic capability verification, it has everything it needs to become the de facto standard.
+
+And when that happens, the question won't be "is my agent good?" but **"can my agent work with the others?"**
+
+---
+
+## My take
+
+In earlier posts I wrote that AI is shifting from a chat in a browser tab to infrastructure that runs in the background. A2A is the missing piece of that story: if agents are going to be processes we manage, they need a common language to coordinate, just like services needed HTTP and APIs needed contracts.
+
+My practical advice: if you're designing a multi-agent system today, **even if you don't adopt A2A yet, design as if you will.** Declare what each agent can do, model tasks with explicit states, and clearly separate "tools" (MCP) from "colleagues" (A2A). Migrating later will be far cheaper.
+
+---
+
+## What do you think?
+
+Do you think A2A will become the "HTTP of agents," or will we end up with several protocols competing for years before one wins?
+
+I'd love to hear your take.
+
+---
+
+### Sources
+
+- [What is the Agent2Agent (A2A) protocol? — IBM Think](https://www.ibm.com/mx-es/think/topics/agent2agent-protocol) (Spanish). Definition, history (Google, April 2025; Linux Foundation, June 23, 2025), the seven components, the discovery → authentication → communication flow, the MCP comparison, and the roadmap.
+- [What is A2A? The Agent2Agent protocol — Alumio](https://www.alumio.com/es/blog/what-is-a2a-agent2agent-ai-protocol) (Spanish). The vertical (MCP) vs. horizontal (A2A) integration distinction, benefits, adoption challenges, use cases, and the role of the orchestration layer.
+- [Official A2A project documentation](https://a2aproject.github.io/A2A/). Spec, SDKs, and implementation samples.
